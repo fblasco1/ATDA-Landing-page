@@ -1,6 +1,6 @@
 import { requireAdminApi } from "@/lib/admin/session";
 import { deleteDocument, patchDocument } from "@/lib/sanity/write";
-import { revalidateTag } from "next/cache";
+import { expireLandingCache } from "@/lib/sanity/fetch";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -11,7 +11,7 @@ export async function PATCH(request: Request, context: Context) {
   try {
     const data = (await request.json()) as Record<string, unknown>;
     const item = await patchDocument(id, data);
-    revalidateTag("landing", "max");
+    expireLandingCache();
     return Response.json({ item });
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : "Error" }, { status: 500 });
@@ -24,7 +24,7 @@ export async function DELETE(_request: Request, context: Context) {
   const { id } = await context.params;
   try {
     await deleteDocument(id);
-    revalidateTag("landing", "max");
+    expireLandingCache();
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : "Error" }, { status: 500 });

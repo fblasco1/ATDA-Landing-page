@@ -1,6 +1,6 @@
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { getReadClient } from "./client";
-import { defaultLandingSettings } from "./defaults";
+import { defaultLandingSettings, mergeLandingSettings } from "./defaults";
 import { isSanityConfigured } from "./env";
 import {
   courseByIdQuery,
@@ -38,7 +38,7 @@ function activeFirst(courses: Course[]) {
 }
 
 async function loadLandingContent(): Promise<LandingContent> {
-  const client = getReadClient();
+  const client = getReadClient({ useCdn: false });
   if (!client) return emptyLanding();
 
   try {
@@ -50,19 +50,7 @@ async function loadLandingContent(): Promise<LandingContent> {
     ]);
 
     return {
-      settings: {
-        ...defaultLandingSettings,
-        ...(settings ?? {}),
-        aboutValues: settings?.aboutValues?.length
-          ? settings.aboutValues
-          : defaultLandingSettings.aboutValues,
-        joinBenefits: settings?.joinBenefits?.length
-          ? settings.joinBenefits
-          : defaultLandingSettings.joinBenefits,
-        joinEligibility: settings?.joinEligibility?.length
-          ? settings.joinEligibility
-          : defaultLandingSettings.joinEligibility,
-      },
+      settings: mergeLandingSettings(settings),
       projects: projects ?? [],
       partners: partners ?? [],
       courses: activeFirst(courses ?? []),
@@ -77,6 +65,11 @@ export const getLandingContent = unstable_cache(loadLandingContent, ["landing-co
   tags: ["landing"],
   revalidate: 60,
 });
+
+/** Tras guardar desde el panel, la próxima visita al sitio tiene que ver el cambio, no la versión anterior. */
+export function expireLandingCache() {
+  revalidateTag("landing", { expire: 0 });
+}
 
 export async function getCourseBySlug(slug: string) {
   const client = getReadClient();
