@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     }
     if (!member.passwordHash) {
       return NextResponse.json(
-        { error: "Todavía no activaste el acceso. Usá Activar acceso." },
+        { error: "Todavía no activaste el acceso. Usá el link del mail de bienvenida o pedile a ATDA que te lo reenvíe." },
         { status: 409 },
       );
     }

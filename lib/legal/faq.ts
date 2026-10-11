@@ -14,7 +14,7 @@ Depende del volumen de solicitudes. Si pasó más de una semana y no recibiste n
 En el email de bienvenida tenés el botón "Activar mi acceso". Ahí confirmás tu DNI (el mismo que cargaste en la solicitud) y elegís una contraseña. Después entrás desde "Acceso socios", arriba a la derecha.
 
 ## No me llegó el email de activación
-Revisá la carpeta de spam o promociones. Si no está, podés activarlo igual: entrá a "Acceso socios", elegí "Activar acceso" y usá el email y el DNI de tu solicitud. También podés pedirnos que te lo reenviemos.
+Revisá la carpeta de spam o promociones. Si no está, escribinos desde el formulario de contacto y te lo reenviamos.
 
 ## Me olvidé la contraseña
 En "Acceso socios" elegí "Recuperar". Verificamos tu identidad con el email y el DNI y definís una contraseña nueva.

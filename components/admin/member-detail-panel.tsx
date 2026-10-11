@@ -114,7 +114,7 @@ export function MemberDetailPanel({
           ))}
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-          <span>Portal: {member.passwordHash ? "acceso activado" : "pendiente de activar (/socio/activar)"}</span>
+          <span>Portal: {member.passwordHash ? "acceso activado" : "pendiente de activar (desde el mail de activación)"}</span>
           {!member.passwordHash && member.status === "active" ? (
             <button
               type="button"

@@ -48,7 +48,7 @@ async function setPassword(body: Record<string, unknown>, mode: "activate" | "re
   }
   if (mode === "recover" && !member.passwordHash) {
     return NextResponse.json(
-      { error: "Todavía no activaste el acceso. Usá Activar acceso." },
+      { error: "Todavía no activaste el acceso. Usá el link del mail de bienvenida o pedile a ATDA que te lo reenvíe." },
       { status: 409 },
     );
   }
