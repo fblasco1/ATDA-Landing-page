@@ -48,6 +48,12 @@ function scrollToHash(href: string) {
   window.scrollTo({ top: offset, behavior: "smooth" });
 }
 
+const secondaryButtonClass =
+  "rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-gray-400 hover:bg-white/5 hover:text-white";
+
+const primaryButtonClass =
+  "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700";
+
 function linkClass(active: boolean) {
   return active
     ? "font-semibold text-teal-300"
@@ -145,20 +151,23 @@ export function Header({
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-6 py-3">
+        <div className="flex items-center justify-between gap-6 lg:grid lg:grid-cols-[1fr_auto_1fr]">
           <Link
             href="/"
             aria-label="Volver a la página de inicio"
-            className={`flex items-center text-white transition-opacity duration-500 ${
+            className={`flex items-center justify-self-start text-white transition-opacity duration-500 ${
               logoLoaded ? "logo-animate" : "opacity-0"
             }`}
             onClick={() => setIsOpen(false)}
           >
-            <ATDALogo className="h-12 w-auto" showSubtitle={false} />
+            <ATDALogo className="h-11 w-auto" showSubtitle={false} />
           </Link>
 
-          <nav className="hidden items-center gap-6 whitespace-nowrap lg:flex xl:gap-8" aria-label="Principal">
+          <nav
+            className="hidden items-center justify-center gap-6 whitespace-nowrap text-[15px] lg:flex xl:gap-9"
+            aria-label="Principal"
+          >
             {navItems.map((item) => {
               const active = isActive(item);
               return (
@@ -175,11 +184,11 @@ export function Header({
             })}
           </nav>
 
-          <div className="hidden items-center gap-4 whitespace-nowrap lg:flex">
+          <div className="hidden items-center justify-self-end gap-3 whitespace-nowrap lg:flex">
             <Link
               href="/socio/login"
-              className={`text-sm ${
-                pathname.startsWith("/socio") ? "font-semibold text-teal-300" : "text-gray-400 hover:text-white"
+              className={`${secondaryButtonClass} ${
+                pathname.startsWith("/socio") ? "border-teal-400/70 text-teal-200" : ""
               }`}
             >
               Acceso socios
@@ -187,7 +196,7 @@ export function Header({
             <Link
               href="/asociacion"
               onClick={() => setIsOpen(false)}
-              className={`rounded-lg bg-blue-600 px-5 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-blue-700 ${
+              className={`${primaryButtonClass} ${
                 pathname.startsWith("/asociacion") ? "ring-2 ring-teal-300/60" : ""
               }`}
             >
@@ -198,8 +207,8 @@ export function Header({
           <button
             type="button"
             onClick={() => setIsOpen((open) => !open)}
-            className="text-gray-300 focus:outline-none lg:hidden"
-            aria-label="Abrir menú"
+            className="rounded-md p-1 text-gray-300 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 lg:hidden"
+            aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={isOpen}
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +227,7 @@ export function Header({
           isOpen ? "max-h-screen opacity-100" : "pointer-events-none max-h-0 opacity-0"
         }`}
       >
-        <div className="flex flex-col items-center space-y-4 bg-gray-900/95 py-4">
+        <div className="flex flex-col items-center gap-4 border-t border-gray-800 bg-gray-900 px-6 py-5">
           {navItems.map((item) => {
             const active = isActive(item);
             return (
@@ -233,20 +242,22 @@ export function Header({
               </Link>
             );
           })}
-          <Link
-            href="/socio/login"
-            onClick={() => setIsOpen(false)}
-            className="text-lg text-gray-300 hover:text-white"
-          >
-            Acceso socios
-          </Link>
-          <Link
-            href="/asociacion"
-            onClick={() => setIsOpen(false)}
-            className="rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700"
-          >
-            {labels.join}
-          </Link>
+          <div className="mt-2 grid w-full max-w-xs grid-cols-2 gap-3">
+            <Link
+              href="/socio/login"
+              onClick={() => setIsOpen(false)}
+              className={`${secondaryButtonClass} text-center`}
+            >
+              Acceso socios
+            </Link>
+            <Link
+              href="/asociacion"
+              onClick={() => setIsOpen(false)}
+              className={`${primaryButtonClass} text-center`}
+            >
+              {labels.join}
+            </Link>
+          </div>
         </div>
       </div>
     </header>
