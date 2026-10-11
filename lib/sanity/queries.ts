@@ -79,7 +79,8 @@ export const partnersQuery = `*[_type == "networkPartner"] | order(name asc){
   _id,
   name,
   url,
-  "logoUrl": coalesce(logo.asset->url, logoUrl)
+  "logoUrl": coalesce(logo.asset->url, logoUrl),
+  logoBackground
 }`;
 
 export const coursesQuery = `*[_type == "course" && defined(price)] | order(_createdAt desc){
