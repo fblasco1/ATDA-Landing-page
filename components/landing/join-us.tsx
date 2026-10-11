@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CollaborationIcon } from "@/components/Icons";
 import type { LandingSettings } from "@/lib/sanity/types";
+import { buttonClass } from "@/components/ui/button";
 
 export function JoinUs({ settings }: { settings: LandingSettings }) {
   return (
@@ -39,7 +40,7 @@ export function JoinUs({ settings }: { settings: LandingSettings }) {
             <p className="mb-6 text-blue-50">{settings.joinCtaText}</p>
             <Link
               href="/asociacion"
-              className="w-full rounded-lg bg-white px-8 py-3 text-center font-bold text-blue-700 shadow-xl transition-all duration-300 hover:scale-105 hover:bg-gray-200"
+              className={buttonClass({ variant: "inverse", size: "lg", className: "w-full" })}
             >
               {settings.joinCtaLabel}
             </Link>

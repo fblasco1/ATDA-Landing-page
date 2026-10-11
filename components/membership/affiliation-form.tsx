@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { PrivacyConsent } from "@/components/legal/privacy-consent";
+import { buttonClass } from "@/components/ui/button";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -141,7 +142,7 @@ export function AffiliationForm() {
       <button
         type="submit"
         disabled={disabled}
-        className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60 md:w-auto"
+        className={buttonClass({ className: "w-full md:w-auto" })}
       >
         {status === "submitting" ? "Enviando…" : status === "success" ? "Solicitud enviada" : "Enviar solicitud"}
       </button>

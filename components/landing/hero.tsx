@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { LandingSettings } from "@/lib/sanity/types";
 import { HeroBackground } from "./hero-background";
+import { buttonClass } from "@/components/ui/button";
 
 export function heroImages(settings: Pick<LandingSettings, "heroImageUrls" | "heroImageUrl">) {
   if (settings.heroImageUrls?.length) return settings.heroImageUrls;
@@ -23,13 +24,13 @@ export function Hero({ settings }: { settings: LandingSettings }) {
         <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
           <Link
             href="/asociacion"
-            className="rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-blue-700"
+            className={buttonClass({ size: "lg" })}
           >
             {settings.navJoinLabel}
           </Link>
           <a
             href="#about"
-            className="rounded-lg border border-gray-400 px-8 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:border-white hover:bg-white/10"
+            className={buttonClass({ variant: "secondary", size: "lg" })}
           >
             Conocenos
           </a>

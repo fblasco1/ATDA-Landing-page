@@ -5,6 +5,7 @@ import { useState } from "react";
 import { isFreeCourse, priceModeOf } from "@/lib/courses/pricing";
 import { formatARS } from "@/lib/utils";
 import type { Course } from "@/lib/sanity/types";
+import { buttonClass } from "@/components/ui/button";
 
 export function CheckoutForm({ course }: { course: Course }) {
   const free = isFreeCourse(course);
@@ -108,7 +109,7 @@ export function CheckoutForm({ course }: { course: Course }) {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
+        className={buttonClass({ className: "w-full" })}
       >
         {free
           ? status === "submitting"

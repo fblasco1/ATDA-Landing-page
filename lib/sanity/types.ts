@@ -67,6 +67,8 @@ export type LandingSettings = {
   privacyPolicy: string;
   /** Texto de /terminos. Vacío = texto base. */
   termsText: string;
+  /** Texto de /preguntas-frecuentes. Vacío = texto base. */
+  faqText: string;
 };
 
 export type Project = {

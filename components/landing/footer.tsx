@@ -69,6 +69,9 @@ export function Footer({ settings }: { settings: LandingSettings }) {
               Estatuto<span className="sr-only"> (se abre en una pestaña nueva)</span>
             </a>
           ) : null}
+          <Link href="/preguntas-frecuentes" className="hover:text-white">
+            Preguntas frecuentes
+          </Link>
           <Link href="/#contact" className="hover:text-white">
             Contacto
           </Link>

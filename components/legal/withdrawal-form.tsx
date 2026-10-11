@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { buttonClass } from "@/components/ui/button";
 
 const inputClass =
   "w-full rounded-md border border-gray-500 bg-gray-950 p-3 text-white placeholder:text-gray-400 focus:border-blue-500 focus:outline-none disabled:opacity-60";
@@ -104,7 +105,7 @@ export function WithdrawalForm() {
       <button
         type="submit"
         disabled={disabled}
-        className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60 md:w-auto"
+        className={buttonClass({ className: "w-full md:w-auto" })}
       >
         {disabled ? "Enviando…" : "Revocar la contratación"}
       </button>

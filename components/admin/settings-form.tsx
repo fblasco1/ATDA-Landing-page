@@ -5,6 +5,7 @@ import { HeroImagesInput } from "@/components/admin/hero-images-input";
 import { IconPicker } from "@/components/admin/icon-picker";
 import { heroImages } from "@/components/landing/hero";
 import { DEFAULT_PRIVACY_POLICY, PRIVACY_PLACEHOLDERS } from "@/lib/legal/privacy";
+import { DEFAULT_FAQ } from "@/lib/legal/faq";
 import { DEFAULT_TERMS } from "@/lib/legal/terms";
 import type { LandingSettings } from "@/lib/sanity/types";
 
@@ -92,6 +93,7 @@ function buildPayload(form: FormData) {
     privacyEmail: form.get("privacyEmail"),
     privacyPolicy: form.get("privacyPolicy"),
     termsText: form.get("termsText"),
+    faqText: form.get("faqText"),
   };
 }
 
@@ -347,6 +349,16 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
           label="Términos y condiciones (/terminos)"
           baseText={DEFAULT_TERMS}
           defaultValue={initial.termsText}
+          onChange={() => {
+            setDirty(true);
+            setStatus("");
+          }}
+        />
+        <LegalTextInput
+          name="faqText"
+          label="Preguntas frecuentes de socios (/preguntas-frecuentes)"
+          baseText={DEFAULT_FAQ}
+          defaultValue={initial.faqText}
           onChange={() => {
             setDirty(true);
             setStatus("");

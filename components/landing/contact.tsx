@@ -5,6 +5,7 @@ import { cloneElement, useState } from "react";
 import { PrivacyConsent } from "@/components/legal/privacy-consent";
 import type { LandingSettings } from "@/lib/sanity/types";
 import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-band";
+import { buttonClass } from "@/components/ui/button";
 
 export function Contact({
   settings,
@@ -231,9 +232,7 @@ export function Contact({
                 <button
                   type="submit"
                   disabled={status === "submitting"}
-                  className={`rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 ${
-                    status === "submitting" ? "cursor-not-allowed opacity-70" : "hover:bg-blue-700"
-                  }`}
+                  className={buttonClass({ size: "lg" })}
                 >
                   {status === "submitting" ? "Enviando..." : "Enviar mensaje"}
                 </button>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ATDALogo } from "@/components/Icons";
+import { buttonClass } from "@/components/ui/button";
 
 type NavItem = {
   name: string;
@@ -48,11 +49,9 @@ function scrollToHash(href: string) {
   window.scrollTo({ top: offset, behavior: "smooth" });
 }
 
-const secondaryButtonClass =
-  "rounded-lg border border-gray-500 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-gray-400 hover:bg-white/5 hover:text-white";
+const secondaryButtonClass = buttonClass({ variant: "secondary", size: "sm" });
 
-const primaryButtonClass =
-  "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700";
+const primaryButtonClass = buttonClass({ size: "sm" });
 
 function linkClass(active: boolean) {
   return active
@@ -72,8 +71,7 @@ export function Header({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [logoLoaded, setLogoLoaded] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+ const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const navItems = buildNavItems(labels).filter((item) => {
     if (item.requires === "network") return showNetwork;
@@ -87,10 +85,8 @@ export function Header({
     const onScroll = () => setIsScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll);
-    const timer = setTimeout(() => setLogoLoaded(true), 100);
-    return () => {
+   return () => {
       window.removeEventListener("scroll", onScroll);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -165,9 +161,7 @@ export function Header({
           <Link
             href="/"
             aria-label="Volver a la página de inicio"
-            className={`flex items-center justify-self-start text-white transition-opacity duration-500 ${
-              logoLoaded ? "logo-animate" : "opacity-0"
-            }`}
+            className="logo-animate flex items-center justify-self-start text-white"
             onClick={() => setIsOpen(false)}
           >
             <ATDALogo className="h-11 w-auto" showSubtitle={false} />
@@ -253,7 +247,7 @@ export function Header({
               </Link>
             );
           })}
-          <div className="mt-2 grid w-full max-w-xs grid-cols-2 gap-3">
+          <div className="mt-2 grid w-full max-w-xs grid-cols-1 gap-3 sm:grid-cols-2">
             <Link
               href="/socio/login"
               onClick={() => setIsOpen(false)}

@@ -4,6 +4,7 @@ import { isModoCheckoutEnabled } from "@/lib/payments/flags";
 import type { Course } from "@/lib/sanity/types";
 import { CoursePrice } from "./course-price";
 import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-band";
+import { buttonClass } from "@/components/ui/button";
 
 export function Courses({
   courses,
@@ -78,7 +79,7 @@ function CourseCard({ course, band }: { course: Course; band: SectionBand }) {
       {finished ? null : (
         <Link
           href={`/propuestas/${course.slug}`}
-          className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-2 text-center font-semibold text-white hover:bg-blue-700"
+          className={buttonClass({ size: "sm", className: "mt-6 w-fit" })}
         >
           {isFreeCourse(course) || isModoCheckoutEnabled() ? "Inscribirme" : "Ver curso"}
         </Link>

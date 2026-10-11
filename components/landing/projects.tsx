@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Project } from "@/lib/sanity/types";
 import { ActivityCard } from "./activity-card";
 import { sectionBandClass, type SectionBand } from "./section-band";
+import { buttonClass } from "@/components/ui/button";
 
 export function Projects({
   projects,
@@ -32,7 +33,7 @@ export function Projects({
         <div className="mt-12 text-center">
           <Link
             href="/novedades"
-            className="inline-block rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-blue-700"
+            className={buttonClass({ size: "lg" })}
           >
             Ver todas las publicaciones
           </Link>
