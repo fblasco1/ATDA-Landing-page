@@ -20,11 +20,13 @@ export async function createMembershipRequest(input: {
   organization?: string;
   roleTitle?: string;
   motivation?: string;
+  privacyAcceptedAt: Date;
 }) {
   const db = getDb();
   const [row] = await db
     .insert(membershipRequests)
     .values({
+      privacyAcceptedAt: input.privacyAcceptedAt,
       fullName: input.fullName,
       email: input.email.toLowerCase(),
       dni: input.dni,

@@ -13,12 +13,12 @@ function PartnerTile({ partner }: { partner: NetworkPartner }) {
   const background = TILE_BACKGROUND[partner.logoBackground ?? "white"];
   const inner = (
     <>
-      <div className={`flex h-28 w-44 items-center justify-center rounded-2xl p-4 sm:h-32 sm:w-52 ${background}`}>
+      <div className={`flex h-24 w-full max-w-44 items-center justify-center rounded-2xl p-4 sm:h-32 sm:w-52 sm:max-w-none ${background}`}>
         {partner.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={partner.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
         ) : (
-          <span className="text-2xl font-bold text-slate-400">{partner.name.slice(0, 1)}</span>
+          <span className="text-2xl font-bold text-slate-600">{partner.name.slice(0, 1)}</span>
         )}
       </div>
       <p className="mt-4 max-w-[13rem] text-center text-sm font-semibold leading-snug text-white sm:text-base">
@@ -61,7 +61,7 @@ export function Network({
           <h2 className="text-3xl font-extrabold text-white md:text-4xl">{title}</h2>
           {subtitle ? <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{subtitle}</p> : null}
         </div>
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-10">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-10">
           {partners.map((partner) => (
             <PartnerTile key={partner._id} partner={partner} />
           ))}

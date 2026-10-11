@@ -4,6 +4,9 @@ import { useRef, useState } from "react";
 import { HeroImagesInput } from "@/components/admin/hero-images-input";
 import { IconPicker } from "@/components/admin/icon-picker";
 import { heroImages } from "@/components/landing/hero";
+import { DEFAULT_PRIVACY_POLICY, PRIVACY_PLACEHOLDERS } from "@/lib/legal/privacy";
+import { DEFAULT_FAQ } from "@/lib/legal/faq";
+import { DEFAULT_TERMS } from "@/lib/legal/terms";
 import type { LandingSettings } from "@/lib/sanity/types";
 
 const SECTION_FIELDS = [
@@ -83,7 +86,62 @@ function buildPayload(form: FormData) {
     socialLinkedin: form.get("socialLinkedin"),
     contactEmail: form.get("contactEmail"),
     statuteUrl: form.get("statuteUrl"),
+    legalName: form.get("legalName"),
+    legalCuit: form.get("legalCuit"),
+    legalRegistration: form.get("legalRegistration"),
+    legalAddress: form.get("legalAddress"),
+    privacyEmail: form.get("privacyEmail"),
+    privacyPolicy: form.get("privacyPolicy"),
+    termsText: form.get("termsText"),
+    faqText: form.get("faqText"),
   };
+}
+
+function LegalTextInput({
+  name,
+  label,
+  baseText,
+  defaultValue,
+  onChange,
+}: {
+  name: string;
+  label: string;
+  baseText: string;
+  defaultValue: string;
+  onChange: () => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  return (
+    <div className="space-y-2">
+      <label className="block">
+        <span className="mb-1 block text-sm text-gray-400">{label}</span>
+        <textarea
+          ref={ref}
+          name={name}
+          defaultValue={defaultValue}
+          rows={12}
+          placeholder="Vacío: se publica el texto base con los datos institucionales de arriba."
+          className="w-full rounded-md border border-gray-700 bg-gray-900 p-2 font-mono text-sm text-white"
+        />
+      </label>
+      <p className="text-xs text-gray-400">
+        Formato: una línea que empieza con <code>## </code> es un título, con <code>- </code> es un ítem de lista y el
+        resto son párrafos. Podés usar {PRIVACY_PLACEHOLDERS.join(", ")} para insertar los datos institucionales.
+      </p>
+      <button
+        type="button"
+        onClick={() => {
+          if (!ref.current) return;
+          if (ref.current.value.trim() && !window.confirm("¿Reemplazar el texto actual por el texto base?")) return;
+          ref.current.value = baseText;
+          onChange();
+        }}
+        className="rounded-md border border-gray-600 px-3 py-1.5 text-sm text-gray-200 hover:border-gray-400 hover:text-white"
+      >
+        Cargar el texto base para editarlo
+      </button>
+    </div>
+  );
 }
 
 export function SettingsForm({ initial }: { initial: LandingSettings }) {
@@ -254,6 +312,58 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
         <AdminInput name="socialLinkedin" label="LinkedIn" defaultValue={initial.socialLinkedin ?? ""} />
         <AdminInput name="contactEmail" label="Email (mailto:)" defaultValue={initial.contactEmail ?? ""} />
         <AdminInput name="statuteUrl" label="Estatuto" defaultValue={initial.statuteUrl ?? ""} />
+      </fieldset>
+      <fieldset className="space-y-3 rounded-lg border border-gray-800 p-4">
+        <legend className="px-2 text-lg font-semibold text-white">Datos institucionales y textos legales</legend>
+        <p className="text-sm text-gray-400">
+          Se muestran en el footer y en las páginas <code>/privacidad</code> y <code>/terminos</code>. Usá la razón
+          social exacta del estatuto. Si un texto queda vacío se publica el texto base.
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          <AdminInput name="legalName" label="Razón social" defaultValue={initial.legalName} />
+          <AdminInput name="legalCuit" label="CUIT" defaultValue={initial.legalCuit} />
+          <AdminInput
+            name="legalRegistration"
+            label="Inscripción (ej.: IGJ Resolución N.º …)"
+            defaultValue={initial.legalRegistration}
+          />
+          <AdminInput name="legalAddress" label="Domicilio legal" defaultValue={initial.legalAddress} />
+          <AdminInput
+            name="privacyEmail"
+            label="Email para pedidos sobre datos personales"
+            defaultValue={initial.privacyEmail}
+          />
+        </div>
+        <LegalTextInput
+          name="privacyPolicy"
+          label="Política de privacidad (/privacidad)"
+          baseText={DEFAULT_PRIVACY_POLICY}
+          defaultValue={initial.privacyPolicy}
+          onChange={() => {
+            setDirty(true);
+            setStatus("");
+          }}
+        />
+        <LegalTextInput
+          name="termsText"
+          label="Términos y condiciones (/terminos)"
+          baseText={DEFAULT_TERMS}
+          defaultValue={initial.termsText}
+          onChange={() => {
+            setDirty(true);
+            setStatus("");
+          }}
+        />
+        <LegalTextInput
+          name="faqText"
+          label="Preguntas frecuentes de socios (/preguntas-frecuentes)"
+          baseText={DEFAULT_FAQ}
+          defaultValue={initial.faqText}
+          onChange={() => {
+            setDirty(true);
+            setStatus("");
+          }}
+        />
       </fieldset>
       <div className="sticky bottom-0 -mx-2 flex flex-wrap items-center gap-4 border-t border-gray-800 bg-gray-950/95 px-2 py-4 backdrop-blur">
         <button

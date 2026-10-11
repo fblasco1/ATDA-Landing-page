@@ -64,7 +64,7 @@ export function MemberLoginForm({ callbackUrl = "/socio" }: { callbackUrl?: stri
       >
         {busy ? "Ingresando…" : "Ingresar"}
       </button>
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-gray-400">
         ¿Primera vez?{" "}
         <Link href="/socio/activar" className="text-teal-300 hover:text-teal-200">
           Activar acceso

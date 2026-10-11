@@ -67,6 +67,60 @@ export function memberActivationEmail(input: { fullName: string; email: string; 
   return { subject, html, text };
 }
 
+export function withdrawalReceiptEmail(input: { fullName: string; code: string; purchase: string }) {
+  const firstName = input.fullName.trim().split(/\s+/)[0] || input.fullName;
+  const subject = `Recibimos tu pedido de arrepentimiento (código ${input.code})`;
+  const html = layout(`
+    <p style="margin:0 0 16px;">Hola ${escapeHtml(firstName)},</p>
+    <p style="margin:0 0 16px;">Recibimos tu pedido para revocar la contratación de <strong>${escapeHtml(input.purchase)}</strong>.</p>
+    <p style="margin:0 0 16px;">Tu código de seguimiento es:</p>
+    <p style="margin:0 0 24px;font-size:24px;font-weight:bold;letter-spacing:2px;text-align:center;">${escapeHtml(input.code)}</p>
+    <p style="margin:0 0 16px;">El equipo de ATDA va a procesar la devolución por el mismo medio de pago y te va a escribir a este email. Guardá este código por si necesitás consultarnos.</p>
+  `);
+  const text = [
+    `Hola ${firstName},`,
+    "",
+    `Recibimos tu pedido para revocar la contratación de ${input.purchase}.`,
+    `Tu código de seguimiento es: ${input.code}`,
+    "",
+    "El equipo de ATDA va a procesar la devolución por el mismo medio de pago y te va a escribir a este email.",
+  ].join("\n");
+  return { subject, html, text };
+}
+
+export function withdrawalNotifyEmail(input: {
+  code: string;
+  fullName: string;
+  email: string;
+  dni: string;
+  purchase: string;
+  details?: string;
+  baseUrl: string;
+}) {
+  const subject = `Botón de arrepentimiento: ${input.fullName} (${input.code})`;
+  const html = layout(`
+    <p style="margin:0 0 16px;">Llegó un pedido de arrepentimiento. Hay que responderlo y gestionar la devolución.</p>
+    <p style="margin:0 0 4px;"><strong>${escapeHtml(input.fullName)}</strong> · DNI ${escapeHtml(input.dni)}</p>
+    <p style="margin:0 0 4px;">${escapeHtml(input.email)}</p>
+    <p style="margin:0 0 4px;">Compra: ${escapeHtml(input.purchase)}</p>
+    ${input.details ? `<p style="margin:0 0 16px;color:#4b5563;">${escapeHtml(input.details)}</p>` : ""}
+    <p style="margin:0 0 16px;">Código: <strong>${escapeHtml(input.code)}</strong></p>
+    ${button(`${input.baseUrl}/admin/arrepentimientos`, "Ver en el panel")}
+  `);
+  const text = [
+    "Llegó un pedido de arrepentimiento.",
+    `${input.fullName} · DNI ${input.dni}`,
+    input.email,
+    `Compra: ${input.purchase}`,
+    input.details ?? "",
+    `Código: ${input.code}`,
+    `Panel: ${input.baseUrl}/admin/arrepentimientos`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  return { subject, html, text };
+}
+
 export function newMembershipRequestEmail(input: {
   fullName: string;
   email: string;

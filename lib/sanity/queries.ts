@@ -37,7 +37,15 @@ export const landingSettingsQuery = `*[_id == "${LANDING_SETTINGS_ID}"][0]{
   socialInstagram,
   socialLinkedin,
   contactEmail,
-  statuteUrl
+  statuteUrl,
+  legalName,
+  legalCuit,
+  legalRegistration,
+  legalAddress,
+  privacyEmail,
+  privacyPolicy,
+  termsText,
+  faqText
 }`;
 
 export const projectsQuery = `*[_type == "project" && published == true] | order(_createdAt desc)[0...3]{

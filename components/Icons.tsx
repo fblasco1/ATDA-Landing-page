@@ -12,7 +12,7 @@ export const ATDALogo: React.FC<{ className?: string; showSubtitle?: boolean }> 
     xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 1044.94 546.68"
     className={className}
-    aria-label="Logo de ATDA, Asociación Tecnológica para el Desarrollo Argentino"
+    aria-label="Logo de ATDA, Asociación Tecnológica por el Desarrollo Argentino"
   >
     <defs>
       <style>{`

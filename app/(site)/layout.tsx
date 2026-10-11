@@ -7,6 +7,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      <a
+        href="#contenido"
+        className="sr-only rounded-md bg-white px-4 py-2 font-semibold text-gray-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70]"
+      >
+        Saltar al contenido
+      </a>
       <Header
         labels={{
           about: settings.navAboutLabel,

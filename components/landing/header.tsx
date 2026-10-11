@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ATDALogo } from "@/components/Icons";
+import { buttonClass } from "@/components/ui/button";
 
 type NavItem = {
   name: string;
@@ -48,11 +49,9 @@ function scrollToHash(href: string) {
   window.scrollTo({ top: offset, behavior: "smooth" });
 }
 
-const secondaryButtonClass =
-  "rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-gray-400 hover:bg-white/5 hover:text-white";
+const secondaryButtonClass = buttonClass({ variant: "secondary", size: "sm" });
 
-const primaryButtonClass =
-  "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700";
+const primaryButtonClass = buttonClass({ size: "sm" });
 
 function linkClass(active: boolean) {
   return active
@@ -72,8 +71,7 @@ export function Header({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [logoLoaded, setLogoLoaded] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+ const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const navItems = buildNavItems(labels).filter((item) => {
     if (item.requires === "network") return showNetwork;
@@ -87,12 +85,19 @@ export function Header({
     const onScroll = () => setIsScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll);
-    const timer = setTimeout(() => setLogoLoaded(true), 100);
-    return () => {
+   return () => {
       window.removeEventListener("scroll", onScroll);
-      clearTimeout(timer);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen]);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -156,9 +161,7 @@ export function Header({
           <Link
             href="/"
             aria-label="Volver a la página de inicio"
-            className={`flex items-center justify-self-start text-white transition-opacity duration-500 ${
-              logoLoaded ? "logo-animate" : "opacity-0"
-            }`}
+            className="logo-animate flex items-center justify-self-start text-white"
             onClick={() => setIsOpen(false)}
           >
             <ATDALogo className="h-11 w-auto" showSubtitle={false} />
@@ -210,6 +213,7 @@ export function Header({
             className="rounded-md p-1 text-gray-300 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 lg:hidden"
             aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={isOpen}
+            aria-controls="menu-mobile"
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isOpen ? (
@@ -223,8 +227,9 @@ export function Header({
       </div>
 
       <div
+        id="menu-mobile"
         className={`absolute inset-x-0 top-full overflow-hidden shadow-lg transition-all duration-300 ease-in-out lg:hidden ${
-          isOpen ? "max-h-screen opacity-100" : "pointer-events-none max-h-0 opacity-0"
+          isOpen ? "visible max-h-screen opacity-100" : "pointer-events-none invisible max-h-0 opacity-0"
         }`}
       >
         <div className="flex flex-col items-center gap-4 border-t border-gray-800 bg-gray-900 px-6 py-5">
@@ -242,7 +247,7 @@ export function Header({
               </Link>
             );
           })}
-          <div className="mt-2 grid w-full max-w-xs grid-cols-2 gap-3">
+          <div className="mt-2 grid w-full max-w-xs grid-cols-1 gap-3 sm:grid-cols-2">
             <Link
               href="/socio/login"
               onClick={() => setIsOpen(false)}

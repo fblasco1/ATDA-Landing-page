@@ -15,7 +15,7 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   return (
-    <div className="min-h-screen bg-gray-900 px-6 py-16">
+    <main id="contenido" tabIndex={-1} className="min-h-screen bg-gray-900 px-6 py-16">
       <div className="container mx-auto max-w-5xl">
         <Link href="/propuestas" className="text-blue-400 hover:text-blue-300">
           ← Volver a {landing.settings.coursesTitle}
@@ -49,6 +49,6 @@ export default async function CoursePage({ params }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

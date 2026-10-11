@@ -22,7 +22,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <main>
+      <main id="contenido" tabIndex={-1}>
         <Hero settings={content.settings} />
         <About settings={content.settings} band={aboutBand} />
         {projectsBand ? (
