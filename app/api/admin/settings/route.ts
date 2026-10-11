@@ -21,7 +21,7 @@ export async function PUT(request: Request) {
   if (error) return error;
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    await snapshotBeforeChange(LANDING_SETTINGS_ID, "update", session.user.email);
+    await snapshotBeforeChange(LANDING_SETTINGS_ID, "update", session.user.email, { replace: body });
     const settings = await upsertLandingSettings(body);
     expireLandingCache();
     return Response.json({ settings });

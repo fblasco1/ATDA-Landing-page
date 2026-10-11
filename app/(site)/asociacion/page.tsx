@@ -1,10 +1,10 @@
 import { AffiliationForm } from "@/components/membership/affiliation-form";
 import { Footer } from "@/components/landing/footer";
-import { getLandingContent } from "@/lib/sanity/fetch";
+import { getSiteContent } from "@/lib/sanity/site-content";
 import { isDatabaseConfigured } from "@/lib/db";
 
 export default async function AffiliationPage() {
-  const landing = await getLandingContent();
+  const landing = await getSiteContent();
   const dbReady = isDatabaseConfigured();
 
   return (

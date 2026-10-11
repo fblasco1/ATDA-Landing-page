@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/landing/footer";
-import { getLandingContent, getProjectBySlug } from "@/lib/sanity/fetch";
+import { getProjectBySlug } from "@/lib/sanity/fetch";
+import { getSiteContent } from "@/lib/sanity/site-content";
 import { formatDateES } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -25,7 +26,7 @@ function CalendarIcon({ className }: { className?: string }) {
 
 export default async function ActivityArticlePage({ params }: Props) {
   const { slug } = await params;
-  const [article, landing] = await Promise.all([getProjectBySlug(slug), getLandingContent()]);
+  const [article, landing] = await Promise.all([getProjectBySlug(slug), getSiteContent()]);
   if (!article) notFound();
 
   const paragraphs = bodyParagraphs(article.body ?? "");

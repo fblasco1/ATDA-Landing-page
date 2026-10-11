@@ -135,11 +135,22 @@ export const contentRevisions = pgTable(
     /** Qué se hizo después de tomar la copia: update | delete | restore */
     action: varchar("action", { length: 16 }).notNull(),
     snapshot: jsonb("snapshot").notNull(),
+    /** Resumen legible de lo que cambió: [{ label, detail }] */
+    changes: jsonb("changes").$type<{ label: string; detail?: string }[]>(),
     createdBy: varchar("created_by", { length: 255 }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index("content_revisions_document_idx").on(table.documentId, table.createdAt)],
 );
+
+/** Contenido sin guardar que un admin está previsualizando en el sitio. */
+export const contentPreviews = pgTable("content_previews", {
+  id: serial("id").primaryKey(),
+  token: varchar("token", { length: 64 }).notNull().unique(),
+  data: jsonb("data").notNull(),
+  createdBy: varchar("created_by", { length: 255 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type ContentRevision = typeof contentRevisions.$inferSelect;

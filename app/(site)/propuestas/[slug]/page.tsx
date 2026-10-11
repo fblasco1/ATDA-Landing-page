@@ -4,13 +4,14 @@ import { CheckoutForm } from "@/components/checkout/checkout-form";
 import { CoursePrice } from "@/components/landing/course-price";
 import { isFreeCourse } from "@/lib/courses/pricing";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
-import { getCourseBySlug, getLandingContent } from "@/lib/sanity/fetch";
+import { getCourseBySlug } from "@/lib/sanity/fetch";
+import { getSiteContent } from "@/lib/sanity/site-content";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function CoursePage({ params }: Props) {
   const { slug } = await params;
-  const [course, landing] = await Promise.all([getCourseBySlug(slug), getLandingContent()]);
+  const [course, landing] = await Promise.all([getCourseBySlug(slug), getSiteContent()]);
   if (!course) notFound();
 
   return (

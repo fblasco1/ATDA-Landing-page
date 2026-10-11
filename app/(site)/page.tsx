@@ -7,10 +7,10 @@ import { JoinUs } from "@/components/landing/join-us";
 import { Network } from "@/components/landing/network";
 import { Projects } from "@/components/landing/projects";
 import { createBandAllocator } from "@/components/landing/section-band";
-import { getLandingContent } from "@/lib/sanity/fetch";
+import { getSiteContent } from "@/lib/sanity/site-content";
 
 export default async function HomePage() {
-  const content = await getLandingContent();
+  const content = await getSiteContent();
   const { settings } = content;
   const nextBand = createBandAllocator();
 

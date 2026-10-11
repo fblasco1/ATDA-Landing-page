@@ -1,6 +1,7 @@
 import { ActivityArchive } from "@/components/landing/activity-archive";
 import { Footer } from "@/components/landing/footer";
-import { getLandingContent, getProjectCategories, getPublishedProjects } from "@/lib/sanity/fetch";
+import { getProjectCategories, getPublishedProjects } from "@/lib/sanity/fetch";
+import { getSiteContent } from "@/lib/sanity/site-content";
 
 function NewspaperIcon({ className }: { className?: string }) {
   return (
@@ -20,7 +21,7 @@ export default async function ActivityIndexPage() {
   const [projects, categories, landing] = await Promise.all([
     getPublishedProjects(),
     getProjectCategories(),
-    getLandingContent(),
+    getSiteContent(),
   ]);
 
   return (

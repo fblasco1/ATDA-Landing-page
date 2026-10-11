@@ -11,7 +11,7 @@ export async function PATCH(request: Request, context: Context) {
   const { id } = await context.params;
   try {
     const data = (await request.json()) as Record<string, unknown>;
-    await snapshotBeforeChange(id, "update", session.user.email);
+    await snapshotBeforeChange(id, "update", session.user.email, { patch: data });
     const item = await patchDocument(id, data);
     expireLandingCache();
     return Response.json({ item });

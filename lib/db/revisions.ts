@@ -13,6 +13,7 @@ export async function saveRevision(input: {
   title: string | null;
   action: RevisionAction;
   snapshot: Record<string, unknown>;
+  changes: { label: string; detail?: string }[];
   createdBy: string | null;
 }) {
   const db = getDb();
@@ -45,6 +46,7 @@ export async function listRevisions({ types, limit = 50 }: { types?: string[]; l
       documentType: contentRevisions.documentType,
       title: contentRevisions.title,
       action: contentRevisions.action,
+      changes: contentRevisions.changes,
       createdBy: contentRevisions.createdBy,
       createdAt: contentRevisions.createdAt,
     })

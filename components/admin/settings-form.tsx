@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { HeroImagesInput } from "@/components/admin/hero-images-input";
 import { IconPicker } from "@/components/admin/icon-picker";
 import { heroImages } from "@/components/landing/hero";
@@ -45,55 +45,62 @@ function SectionTitleFields({
   );
 }
 
+function buildPayload(form: FormData) {
+  const aboutValues = [0, 1, 2, 3].map((index) => ({
+    icon: String(form.get(`valueIcon${index}`) ?? "collaboration"),
+    title: String(form.get(`valueTitle${index}`) ?? ""),
+    description: String(form.get(`valueDescription${index}`) ?? ""),
+  }));
+  const heroImageUrls = JSON.parse(String(form.get("heroImageUrls") ?? "[]")) as string[];
+  const sectionFields = Object.fromEntries(SECTION_FIELDS.map((key) => [key, form.get(key)]));
+  return {
+    ...sectionFields,
+    heroTitle: form.get("heroTitle"),
+    heroSubtitle: form.get("heroSubtitle"),
+    heroImageUrls,
+    heroImageUrl: heroImageUrls[0] ?? "",
+    aboutTitle: form.get("aboutTitle"),
+    aboutBody: form.get("aboutBody"),
+    aboutValues,
+    joinTitle: form.get("joinTitle"),
+    joinSubtitle: form.get("joinSubtitle"),
+    joinBenefits: String(form.get("joinBenefits") ?? "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean),
+    joinEligibility: [0, 1, 2].map((index) => ({
+      title: String(form.get(`eligTitle${index}`) ?? ""),
+      description: String(form.get(`eligDescription${index}`) ?? ""),
+    })),
+    joinCtaText: form.get("joinCtaText"),
+    joinCtaLabel: form.get("joinCtaLabel"),
+    contactTitle: form.get("contactTitle"),
+    contactSubtitle: form.get("contactSubtitle"),
+    formspreeEndpoint: form.get("formspreeEndpoint"),
+    footerText: form.get("footerText"),
+    socialTwitter: form.get("socialTwitter"),
+    socialInstagram: form.get("socialInstagram"),
+    socialLinkedin: form.get("socialLinkedin"),
+    contactEmail: form.get("contactEmail"),
+    statuteUrl: form.get("statuteUrl"),
+  };
+}
+
 export function SettingsForm({ initial }: { initial: LandingSettings }) {
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const formRef = useRef<HTMLFormElement>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [previewError, setPreviewError] = useState("");
+  const [previewBlocked, setPreviewBlocked] = useState(false);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
     setStatus("");
-    const form = new FormData(event.currentTarget);
-    const aboutValues = [0, 1, 2, 3].map((index) => ({
-      icon: String(form.get(`valueIcon${index}`) ?? "collaboration"),
-      title: String(form.get(`valueTitle${index}`) ?? ""),
-      description: String(form.get(`valueDescription${index}`) ?? ""),
-    }));
-    const heroImageUrls = JSON.parse(String(form.get("heroImageUrls") ?? "[]")) as string[];
-    const sectionFields = Object.fromEntries(SECTION_FIELDS.map((key) => [key, form.get(key)]));
-    const payload = {
-      ...sectionFields,
-      heroTitle: form.get("heroTitle"),
-      heroSubtitle: form.get("heroSubtitle"),
-      heroImageUrls,
-      heroImageUrl: heroImageUrls[0] ?? "",
-      aboutTitle: form.get("aboutTitle"),
-      aboutBody: form.get("aboutBody"),
-      aboutValues,
-      joinTitle: form.get("joinTitle"),
-      joinSubtitle: form.get("joinSubtitle"),
-      joinBenefits: String(form.get("joinBenefits") ?? "")
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean),
-      joinEligibility: [0, 1, 2].map((index) => ({
-        title: String(form.get(`eligTitle${index}`) ?? ""),
-        description: String(form.get(`eligDescription${index}`) ?? ""),
-      })),
-      joinCtaText: form.get("joinCtaText"),
-      joinCtaLabel: form.get("joinCtaLabel"),
-      contactTitle: form.get("contactTitle"),
-      contactSubtitle: form.get("contactSubtitle"),
-      formspreeEndpoint: form.get("formspreeEndpoint"),
-      footerText: form.get("footerText"),
-      socialTwitter: form.get("socialTwitter"),
-      socialInstagram: form.get("socialInstagram"),
-      socialLinkedin: form.get("socialLinkedin"),
-      contactEmail: form.get("contactEmail"),
-      statuteUrl: form.get("statuteUrl"),
-    };
-
+    const payload = buildPayload(new FormData(event.currentTarget));
     const response = await fetch("/api/admin/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -102,6 +109,29 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
     setSaving(false);
     setStatus(response.ok ? "saved" : "error");
     if (response.ok) setDirty(false);
+  };
+
+  const handlePreview = async () => {
+    if (!formRef.current) return;
+    // La pestaña se abre antes del fetch para que el navegador no la bloquee como popup.
+    const tab = window.open("about:blank", "_blank");
+    setPreviewing(true);
+    setPreviewError("");
+    setPreviewBlocked(false);
+    const response = await fetch("/api/admin/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildPayload(new FormData(formRef.current))),
+    }).catch(() => null);
+    const data = (await response?.json().catch(() => ({}))) as { url?: string; error?: string } | undefined;
+    setPreviewing(false);
+    if (response?.ok && data?.url) {
+      if (tab) tab.location.href = data.url;
+      else setPreviewBlocked(true);
+    } else {
+      tab?.close();
+      setPreviewError(data?.error ?? "No se pudo abrir la vista previa");
+    }
   };
 
   const aboutValues =
@@ -118,10 +148,12 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit}
       onChange={() => {
         setDirty(true);
         setStatus("");
+        setPreviewError("");
       }}
       className="space-y-8"
     >
@@ -231,8 +263,28 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
         >
           {saving ? "Guardando..." : "Guardar contenido"}
         </button>
+        <button
+          type="button"
+          onClick={handlePreview}
+          disabled={previewing || saving}
+          className="rounded-lg border border-gray-600 px-5 py-3 font-semibold text-gray-200 hover:border-gray-400 hover:text-white disabled:opacity-70"
+        >
+          {previewing ? "Preparando..." : "Vista previa"}
+        </button>
         <p role="status" className="text-sm">
-          {saving ? null : dirty ? (
+          {previewError ? (
+            <span className="text-red-400">{previewError}</span>
+          ) : previewBlocked ? (
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener"
+              onClick={() => setPreviewBlocked(false)}
+              className="text-teal-300 underline hover:text-teal-200"
+            >
+              Vista previa lista: abrir el sitio
+            </a>
+          ) : saving ? null : dirty ? (
             <span className="text-amber-300">Tenés cambios sin guardar</span>
           ) : status === "saved" ? (
             <span className="text-teal-300">Guardado. Ya se ve en el sitio.</span>

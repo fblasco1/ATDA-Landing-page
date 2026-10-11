@@ -1,10 +1,11 @@
 import { CoursesArchive } from "@/components/landing/courses-archive";
 import { Footer } from "@/components/landing/footer";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
-import { getCourseCategories, getLandingContent } from "@/lib/sanity/fetch";
+import { getCourseCategories } from "@/lib/sanity/fetch";
+import { getSiteContent } from "@/lib/sanity/site-content";
 
 export default async function CoursesPage() {
-  const [content, categories] = await Promise.all([getLandingContent(), getCourseCategories()]);
+  const [content, categories] = await Promise.all([getSiteContent(), getCourseCategories()]);
 
   return (
     <div className="min-h-screen bg-gray-900">

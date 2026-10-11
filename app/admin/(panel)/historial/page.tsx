@@ -11,9 +11,9 @@ export default async function AdminHistoryPage() {
     <div>
       <h1 className="mb-2 text-3xl font-bold text-white">Historial de cambios</h1>
       <p className="mb-6 max-w-3xl text-gray-400">
-        Antes de cada cambio en la landing, Novedades, Red o Propuestas se guarda cómo estaba. Si algo no quedó bien,
-        restaurá la versión anterior: el sitio vuelve a mostrarla en el momento. También sirve para recuperar algo
-        borrado. Se guardan las últimas 20 versiones de cada contenido.
+        Cada cambio en la landing, Novedades, Red o Propuestas queda registrado con lo que se modificó. Si algo no
+        quedó bien, usá Volver a antes de este cambio: el sitio lo muestra en el momento. También sirve para recuperar
+        algo borrado. Se guardan los últimos 20 cambios de cada contenido.
       </p>
       {!dbReady ? (
         <p className="text-amber-300">Falta configurar la base de datos para guardar el historial.</p>
@@ -24,6 +24,7 @@ export default async function AdminHistoryPage() {
             title: revision.title ?? revision.documentId,
             type: REVISION_TYPE_LABEL[revision.documentType] ?? revision.documentType,
             action: REVISION_ACTION_LABEL[revision.action] ?? revision.action,
+            changes: revision.changes ?? [],
             createdBy: revision.createdBy,
             createdAt: revision.createdAt.toISOString(),
           }))}
