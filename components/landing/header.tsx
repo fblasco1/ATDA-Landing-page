@@ -13,19 +13,30 @@ type NavItem = {
   requires?: "network" | "courses";
 };
 
-const ALL_NAV_ITEMS: NavItem[] = [
-  { name: "Sobre Nosotros", href: "/#about", sectionId: "about" },
-  { name: "Novedades", href: "/novedades", sectionId: "novedades", matchPath: "/novedades" },
-  { name: "Red", href: "/#network", sectionId: "network", requires: "network" },
-  {
-    name: "Propuestas",
-    href: "/propuestas",
-    sectionId: "propuestas",
-    matchPath: "/propuestas",
-    requires: "courses",
-  },
-  { name: "Contacto", href: "/#contact", sectionId: "contact" },
-];
+export type HeaderLabels = {
+  about: string;
+  news: string;
+  network: string;
+  courses: string;
+  contact: string;
+  join: string;
+};
+
+function buildNavItems(labels: HeaderLabels): NavItem[] {
+  return [
+    { name: labels.about, href: "/#about", sectionId: "about" },
+    { name: labels.news, href: "/novedades", sectionId: "novedades", matchPath: "/novedades" },
+    { name: labels.network, href: "/#network", sectionId: "network", requires: "network" },
+    {
+      name: labels.courses,
+      href: "/propuestas",
+      sectionId: "propuestas",
+      matchPath: "/propuestas",
+      requires: "courses",
+    },
+    { name: labels.contact, href: "/#contact", sectionId: "contact" },
+  ];
+}
 
 function scrollToHash(href: string) {
   const hash = href.includes("#") ? `#${href.split("#")[1]}` : href;
@@ -44,9 +55,11 @@ function linkClass(active: boolean) {
 }
 
 export function Header({
+  labels,
   showNetwork = false,
   showCourses = false,
 }: {
+  labels: HeaderLabels;
   showNetwork?: boolean;
   showCourses?: boolean;
 }) {
@@ -56,7 +69,7 @@ export function Header({
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  const navItems = ALL_NAV_ITEMS.filter((item) => {
+  const navItems = buildNavItems(labels).filter((item) => {
     if (item.requires === "network") return showNetwork;
     if (item.requires === "courses") return showCourses;
     return true;
@@ -150,7 +163,7 @@ export function Header({
               const active = isActive(item);
               return (
                 <Link
-                  key={item.href}
+                  key={item.sectionId ?? item.href}
                   href={item.href}
                   onClick={(event) => handleNavClick(event, item)}
                   className={linkClass(active)}
@@ -178,7 +191,7 @@ export function Header({
                 pathname.startsWith("/asociacion") ? "ring-2 ring-teal-300/60" : ""
               }`}
             >
-              Quiero ser parte
+              {labels.join}
             </Link>
           </div>
 
@@ -210,7 +223,7 @@ export function Header({
             const active = isActive(item);
             return (
               <Link
-                key={item.href}
+                key={item.sectionId ?? item.href}
                 href={item.href}
                 onClick={(event) => handleNavClick(event, item)}
                 className={`text-lg ${linkClass(active)}`}
@@ -232,7 +245,7 @@ export function Header({
             onClick={() => setIsOpen(false)}
             className="rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700"
           >
-            Quiero ser parte
+            {labels.join}
           </Link>
         </div>
       </div>

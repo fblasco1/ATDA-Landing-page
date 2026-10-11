@@ -1,8 +1,49 @@
 "use client";
 
 import { useState } from "react";
+import { HeroImagesInput } from "@/components/admin/hero-images-input";
 import { IconPicker } from "@/components/admin/icon-picker";
+import { heroImages } from "@/components/landing/hero";
 import type { LandingSettings } from "@/lib/sanity/types";
+
+const SECTION_FIELDS = [
+  "navAboutLabel",
+  "navNewsLabel",
+  "navNetworkLabel",
+  "navCoursesLabel",
+  "navContactLabel",
+  "navJoinLabel",
+  "newsTitle",
+  "newsSubtitle",
+  "networkTitle",
+  "networkSubtitle",
+  "coursesTitle",
+  "coursesSubtitle",
+  "membershipTitle",
+  "membershipSubtitle",
+] as const satisfies readonly (keyof LandingSettings)[];
+
+type SectionField = (typeof SECTION_FIELDS)[number];
+
+function SectionTitleFields({
+  heading,
+  titleName,
+  subtitleName,
+  initial,
+}: {
+  heading: string;
+  titleName: SectionField;
+  subtitleName: SectionField;
+  initial: LandingSettings;
+}) {
+  return (
+    <div className="space-y-3 rounded-lg border border-gray-800/80 p-3">
+      <p className="text-sm font-semibold text-gray-200">{heading}</p>
+      <AdminInput name={titleName} label="Título" defaultValue={initial[titleName]} />
+      <AdminTextarea name={subtitleName} label="Bajada" defaultValue={initial[subtitleName]} rows={2} />
+    </div>
+  );
+}
 
 export function SettingsForm({ initial }: { initial: LandingSettings }) {
   const [status, setStatus] = useState<"" | "saved" | "error">("");
@@ -19,10 +60,14 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
       title: String(form.get(`valueTitle${index}`) ?? ""),
       description: String(form.get(`valueDescription${index}`) ?? ""),
     }));
+    const heroImageUrls = JSON.parse(String(form.get("heroImageUrls") ?? "[]")) as string[];
+    const sectionFields = Object.fromEntries(SECTION_FIELDS.map((key) => [key, form.get(key)]));
     const payload = {
+      ...sectionFields,
       heroTitle: form.get("heroTitle"),
       heroSubtitle: form.get("heroSubtitle"),
-      heroImageUrl: form.get("heroImageUrl"),
+      heroImageUrls,
+      heroImageUrl: heroImageUrls[0] ?? "",
       aboutTitle: form.get("aboutTitle"),
       aboutBody: form.get("aboutBody"),
       aboutValues,
@@ -84,7 +129,56 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
         <legend className="px-2 text-lg font-semibold text-white">Hero</legend>
         <AdminInput name="heroTitle" label="Título" defaultValue={initial.heroTitle} />
         <AdminTextarea name="heroSubtitle" label="Subtítulo" defaultValue={initial.heroSubtitle} />
-        <AdminInput name="heroImageUrl" label="URL de imagen" defaultValue={initial.heroImageUrl ?? ""} />
+        <HeroImagesInput
+          name="heroImageUrls"
+          initial={heroImages(initial)}
+          onChange={() => {
+            setDirty(true);
+            setStatus("");
+          }}
+        />
+      </fieldset>
+      <fieldset className="space-y-4 rounded-lg border border-gray-800 p-4">
+        <legend className="px-2 text-lg font-semibold text-white">Nombres de secciones y menú</legend>
+        <p className="text-sm text-gray-400">
+          Cambiar un nombre no rompe los enlaces: las direcciones de las páginas siguen siendo las mismas. Si dejás un
+          nombre vacío se usa el original.
+        </p>
+        <div className="grid gap-3 md:grid-cols-3">
+          <AdminInput name="navAboutLabel" label="Menú: Sobre nosotros" defaultValue={initial.navAboutLabel} />
+          <AdminInput name="navNewsLabel" label="Menú: Novedades" defaultValue={initial.navNewsLabel} />
+          <AdminInput name="navNetworkLabel" label="Menú: Red" defaultValue={initial.navNetworkLabel} />
+          <AdminInput name="navCoursesLabel" label="Menú: Propuestas" defaultValue={initial.navCoursesLabel} />
+          <AdminInput name="navContactLabel" label="Menú: Contacto" defaultValue={initial.navContactLabel} />
+          <AdminInput name="navJoinLabel" label="Botón: Quiero ser parte" defaultValue={initial.navJoinLabel} />
+        </div>
+        <SectionTitleFields
+          heading="Novedades (sección y página /novedades)"
+          titleName="newsTitle"
+          subtitleName="newsSubtitle"
+          initial={initial}
+        />
+        <SectionTitleFields
+          heading="Red"
+          titleName="networkTitle"
+          subtitleName="networkSubtitle"
+          initial={initial}
+        />
+        <SectionTitleFields
+          heading="Propuestas (sección y página /propuestas)"
+          titleName="coursesTitle"
+          subtitleName="coursesSubtitle"
+          initial={initial}
+        />
+        <SectionTitleFields
+          heading="Página de asociación (/asociacion)"
+          titleName="membershipTitle"
+          subtitleName="membershipSubtitle"
+          initial={initial}
+        />
+        <p className="text-xs text-gray-500">
+          Los títulos de Quiénes somos, Sumate y Contacto se editan en sus propias secciones más abajo.
+        </p>
       </fieldset>
       <fieldset className="space-y-3 rounded-lg border border-gray-800 p-4">
         <legend className="px-2 text-lg font-semibold text-white">Quiénes somos</legend>

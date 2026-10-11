@@ -21,6 +21,22 @@ export type LandingSettings = {
   heroTitle: string;
   heroSubtitle: string;
   heroImageUrl?: string;
+  /** Imágenes del carrusel del Hero, en orden. Si está vacío se usa `heroImageUrl`. */
+  heroImageUrls: string[];
+  navAboutLabel: string;
+  navNewsLabel: string;
+  navNetworkLabel: string;
+  navCoursesLabel: string;
+  navContactLabel: string;
+  navJoinLabel: string;
+  newsTitle: string;
+  newsSubtitle: string;
+  networkTitle: string;
+  networkSubtitle: string;
+  coursesTitle: string;
+  coursesSubtitle: string;
+  membershipTitle: string;
+  membershipSubtitle: string;
   aboutTitle: string;
   aboutBody: string;
   aboutValues: AboutValue[];

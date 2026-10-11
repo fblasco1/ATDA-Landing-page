@@ -9,11 +9,10 @@ export default async function CoursesPage() {
   return (
     <div className="min-h-screen bg-gray-900">
       <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-teal-600 px-6 py-16 text-center text-white">
-        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">Propuestas</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">{content.settings.coursesTitle}</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/90">
-          {isModoCheckoutEnabled()
-            ? "Formaciones de ATDA. Inscribite pagando con MODO."
-            : "Formaciones de ATDA."}
+          {content.settings.coursesSubtitle}
+          {isModoCheckoutEnabled() ? " Inscribite pagando con MODO." : null}
         </p>
       </section>
       {content.courses.length === 0 ? (

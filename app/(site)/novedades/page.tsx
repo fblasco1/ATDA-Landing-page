@@ -29,10 +29,10 @@ export default async function ActivityIndexPage() {
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30">
           <NewspaperIcon className="h-8 w-8 text-white" />
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">Novedades</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/90">
-          Mantente informado sobre las últimas novedades de la Asociación Tecnológica por el Desarrollo Argentino.
-        </p>
+        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">{landing.settings.newsTitle}</h1>
+        {landing.settings.newsSubtitle ? (
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/90">{landing.settings.newsSubtitle}</p>
+        ) : null}
       </section>
       <main className="px-6 py-12">
         <div className="container mx-auto max-w-6xl">

@@ -7,10 +7,14 @@ import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-
 
 export function Courses({
   courses,
+  title,
+  subtitle,
   band = "base",
   showHeading = true,
 }: {
   courses: Course[];
+  title?: string;
+  subtitle?: string;
   band?: SectionBand;
   showHeading?: boolean;
 }) {
@@ -21,11 +25,10 @@ export function Courses({
       <div className="container mx-auto px-6">
         {showHeading ? (
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-extrabold text-white md:text-4xl">Propuestas</h2>
+            <h2 className="text-3xl font-extrabold text-white md:text-4xl">{title}</h2>
             <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">
-              {isModoCheckoutEnabled()
-                ? "Formaciones de ATDA. Inscribite pagando con MODO (QR o app bancaria)."
-                : "Formaciones de ATDA."}
+              {subtitle}
+              {isModoCheckoutEnabled() ? " Inscribite pagando con MODO (QR o app bancaria)." : null}
             </p>
           </div>
         ) : null}

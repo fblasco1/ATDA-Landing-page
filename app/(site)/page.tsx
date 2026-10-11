@@ -11,6 +11,7 @@ import { getLandingContent } from "@/lib/sanity/fetch";
 
 export default async function HomePage() {
   const content = await getLandingContent();
+  const { settings } = content;
   const nextBand = createBandAllocator();
 
   const aboutBand = nextBand();
@@ -24,9 +25,30 @@ export default async function HomePage() {
       <main>
         <Hero settings={content.settings} />
         <About settings={content.settings} band={aboutBand} />
-        {projectsBand ? <Projects projects={content.projects} band={projectsBand} /> : null}
-        {networkBand ? <Network partners={content.partners} band={networkBand} /> : null}
-        {coursesBand ? <Courses courses={content.courses} band={coursesBand} /> : null}
+        {projectsBand ? (
+          <Projects
+            projects={content.projects}
+            title={settings.newsTitle}
+            subtitle={settings.newsSubtitle}
+            band={projectsBand}
+          />
+        ) : null}
+        {networkBand ? (
+          <Network
+            partners={content.partners}
+            title={settings.networkTitle}
+            subtitle={settings.networkSubtitle}
+            band={networkBand}
+          />
+        ) : null}
+        {coursesBand ? (
+          <Courses
+            courses={content.courses}
+            title={settings.coursesTitle}
+            subtitle={settings.coursesSubtitle}
+            band={coursesBand}
+          />
+        ) : null}
         <JoinUs settings={content.settings} />
         <Contact settings={content.settings} band={contactBand} />
       </main>

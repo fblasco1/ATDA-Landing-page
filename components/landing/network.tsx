@@ -41,18 +41,25 @@ function PartnerTile({ partner }: { partner: NetworkPartner }) {
   return <div className={className}>{inner}</div>;
 }
 
-export function Network({ partners, band = "alt" }: { partners: NetworkPartner[]; band?: SectionBand }) {
+export function Network({
+  partners,
+  title,
+  subtitle,
+  band = "alt",
+}: {
+  partners: NetworkPartner[];
+  title: string;
+  subtitle: string;
+  band?: SectionBand;
+}) {
   if (partners.length === 0) return null;
 
   return (
     <section id="network" className={`${sectionBandClass(band)} py-20`}>
       <div className="container mx-auto px-6">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-extrabold text-white md:text-4xl">Nuestra Red</h2>
-          <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">
-            Construimos alianzas con un ecosistema de instituciones, empresas y organizaciones que potencian el
-            desarrollo tecnológico nacional.
-          </p>
+          <h2 className="text-3xl font-extrabold text-white md:text-4xl">{title}</h2>
+          {subtitle ? <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{subtitle}</p> : null}
         </div>
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-10">
           {partners.map((partner) => (

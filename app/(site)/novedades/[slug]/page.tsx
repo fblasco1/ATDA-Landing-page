@@ -39,7 +39,7 @@ export default async function ActivityArticlePage({ params }: Props) {
             href="/novedades"
             className="inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300"
           >
-            <span aria-hidden>←</span> Volver a Novedades
+            <span aria-hidden>←</span> Volver a {landing.settings.newsTitle}
           </Link>
 
           {article.category ? (

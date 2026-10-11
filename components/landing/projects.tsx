@@ -3,7 +3,17 @@ import type { Project } from "@/lib/sanity/types";
 import { ActivityCard } from "./activity-card";
 import { sectionBandClass, type SectionBand } from "./section-band";
 
-export function Projects({ projects, band = "base" }: { projects: Project[]; band?: SectionBand }) {
+export function Projects({
+  projects,
+  title,
+  subtitle,
+  band = "base",
+}: {
+  projects: Project[];
+  title: string;
+  subtitle: string;
+  band?: SectionBand;
+}) {
   if (projects.length === 0) return null;
 
   return (
@@ -11,10 +21,8 @@ export function Projects({ projects, band = "base" }: { projects: Project[]; ban
       <div className="container mx-auto px-6">
         <div className="mb-12 text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-teal-400">Actualidad</p>
-          <h2 className="text-3xl font-extrabold text-white md:text-4xl">Novedades</h2>
-          <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">
-            Las últimas publicaciones sobre tecnología, industria y desarrollo en Argentina.
-          </p>
+          <h2 className="text-3xl font-extrabold text-white md:text-4xl">{title}</h2>
+          {subtitle ? <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{subtitle}</p> : null}
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (

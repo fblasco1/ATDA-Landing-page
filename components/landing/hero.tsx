@@ -1,16 +1,15 @@
 import type { LandingSettings } from "@/lib/sanity/types";
+import { HeroBackground } from "./hero-background";
+
+export function heroImages(settings: Pick<LandingSettings, "heroImageUrls" | "heroImageUrl">) {
+  if (settings.heroImageUrls?.length) return settings.heroImageUrls;
+  return settings.heroImageUrl ? [settings.heroImageUrl] : [];
+}
 
 export function Hero({ settings }: { settings: LandingSettings }) {
   return (
     <section id="home" className="relative flex h-screen items-center justify-center text-center text-white">
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: settings.heroImageUrl
-            ? `url('${settings.heroImageUrl}')`
-            : "linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #134e4a 100%)",
-        }}
-      />
+      <HeroBackground images={heroImages(settings)} />
       <div className="absolute inset-0 bg-black opacity-60" />
       <div className="relative z-10 flex flex-col items-center p-6">
         <h1 className="mb-4 bg-gradient-to-r from-blue-400 to-teal-300 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent md:text-6xl lg:text-7xl">
