@@ -1,11 +1,9 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export function ChangePasswordForm({ forced }: { forced: boolean }) {
-  const router = useRouter();
   const { update } = useSession();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,10 +27,13 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
         return;
       }
       setSaved(true);
-      await update();
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      router.replace("/admin");
-      router.refresh();
+      // Sin argumentos `update()` solo relee la sesión y el token sigue pidiendo cambiar la contraseña.
+      const session = await update({ passwordChanged: true });
+      if (session && !session.user?.mustChangePassword) {
+        window.location.assign("/admin");
+      } else {
+        await signOut({ callbackUrl: "/admin/login" });
+      }
     } catch {
       setError("Error de red. Intentá de nuevo.");
       setBusy(false);
