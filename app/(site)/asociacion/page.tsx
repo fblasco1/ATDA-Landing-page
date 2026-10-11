@@ -11,7 +11,7 @@ export default async function AffiliationPage() {
     <div className="min-h-screen bg-gray-950">
       <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-teal-600 px-6 py-16 text-center text-white">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-100">Sumate</p>
-        <h1 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">Solicitud de afiliación</h1>
+        <h1 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">Solicitud de asociación</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/90">
           Completá el formulario para pedir ser socio de ATDA. Revisamos cada solicitud y te contactamos.
         </p>

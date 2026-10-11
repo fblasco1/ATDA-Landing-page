@@ -171,10 +171,10 @@ export function Header({
               Acceso socios
             </Link>
             <Link
-              href="/afiliacion"
+              href="/asociacion"
               onClick={() => setIsOpen(false)}
               className={`rounded-lg bg-blue-600 px-5 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-blue-700 ${
-                pathname.startsWith("/afiliacion") ? "ring-2 ring-teal-300/60" : ""
+                pathname.startsWith("/asociacion") ? "ring-2 ring-teal-300/60" : ""
               }`}
             >
               Quiero ser parte
@@ -227,7 +227,7 @@ export function Header({
             Acceso socios
           </Link>
           <Link
-            href="/afiliacion"
+            href="/asociacion"
             onClick={() => setIsOpen(false)}
             className="rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700"
           >

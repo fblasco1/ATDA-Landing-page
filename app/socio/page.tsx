@@ -35,7 +35,7 @@ export default async function SocioDashboardPage() {
         <MemberNav />
 
         <h1 className="mb-2 text-3xl font-bold text-white">Hola, {member.fullName.split(" ")[0]}</h1>
-        <p className="mb-8 text-gray-400">Datos personales y estado de tu cuota de afiliación.</p>
+        <p className="mb-8 text-gray-400">Datos personales y estado de tu cuota de socio.</p>
 
         <section className="mb-8 rounded-xl border border-gray-800 bg-gray-900/60 p-6">
           <h2 className="mb-4 text-lg font-semibold text-white">Datos personales</h2>

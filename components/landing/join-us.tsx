@@ -13,7 +13,7 @@ export function JoinUs({ settings }: { settings: LandingSettings }) {
         <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="space-y-8">
             <div>
-              <h3 className="mb-4 text-2xl font-bold text-white">Beneficios de ser Miembro</h3>
+              <h3 className="mb-4 text-2xl font-bold text-white">Beneficios para socios</h3>
               <ul className="list-inside list-disc space-y-3 text-blue-100">
                 {settings.joinBenefits.map((benefit) => (
                   <li key={benefit}>{benefit}</li>
@@ -38,7 +38,7 @@ export function JoinUs({ settings }: { settings: LandingSettings }) {
             </div>
             <p className="mb-6 text-blue-100">{settings.joinCtaText}</p>
             <Link
-              href="/afiliacion"
+              href="/asociacion"
               className="w-full rounded-lg bg-white px-8 py-3 text-center font-bold text-blue-700 shadow-xl transition-all duration-300 hover:scale-105 hover:bg-gray-200"
             >
               {settings.joinCtaLabel}

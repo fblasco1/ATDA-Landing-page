@@ -63,7 +63,7 @@ export function MembershipRequestsPanel({
   if (!dbReady) {
     return (
       <div className="rounded-lg border border-amber-700/50 bg-amber-950/30 p-4 text-amber-100">
-        Configurá `DATABASE_URL` (Neon) para gestionar solicitudes de afiliación.
+        Configurá `DATABASE_URL` (Neon) para gestionar solicitudes de asociación.
       </div>
     );
   }

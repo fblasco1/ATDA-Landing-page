@@ -5,7 +5,7 @@ export default function SocioActivarPage() {
   return (
     <MemberShell
       title="Activar acceso"
-      subtitle="Usá el email y DNI de tu afiliación para crear tu contraseña."
+      subtitle="Usá el email y DNI de tu solicitud de asociación para crear tu contraseña."
     >
       <MemberAccessForm mode="activate" />
     </MemberShell>

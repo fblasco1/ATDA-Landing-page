@@ -36,7 +36,7 @@ export default async function AdminSociosPage({
     <div>
       <h1 className="mb-2 text-3xl font-bold text-white">Socios</h1>
       <p className="mb-6 text-gray-400">
-        Solicitudes de afiliación, altas/bajas y cuotas mensuales.
+        Solicitudes de asociación, altas/bajas y cuotas mensuales.
       </p>
 
       <div className="mb-6 flex gap-2 border-b border-gray-800 pb-3">

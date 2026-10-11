@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   async redirects() {
     return [
+      { source: "/afiliacion", destination: "/asociacion", permanent: true },
       { source: "/actividad", destination: "/novedades", permanent: true },
       { source: "/actividad/:slug", destination: "/novedades/:slug", permanent: true },
       { source: "/cursos", destination: "/propuestas", permanent: true },
