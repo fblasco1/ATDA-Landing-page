@@ -43,7 +43,8 @@ export const landingSettingsQuery = `*[_id == "${LANDING_SETTINGS_ID}"][0]{
   legalRegistration,
   legalAddress,
   privacyEmail,
-  privacyPolicy
+  privacyPolicy,
+  termsText
 }`;
 
 export const projectsQuery = `*[_type == "project" && published == true] | order(_createdAt desc)[0...3]{

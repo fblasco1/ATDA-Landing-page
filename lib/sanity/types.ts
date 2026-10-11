@@ -65,6 +65,8 @@ export type LandingSettings = {
   privacyEmail: string;
   /** Texto de /privacidad. Vacío = texto base generado con los datos institucionales. */
   privacyPolicy: string;
+  /** Texto de /terminos. Vacío = texto base. */
+  termsText: string;
 };
 
 export type Project = {

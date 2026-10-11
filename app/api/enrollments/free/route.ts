@@ -12,6 +12,7 @@ export async function POST(request: Request) {
       dni?: string;
       phone?: string;
       website?: string;
+      termsAccepted?: boolean;
     };
     if (body.website?.trim()) {
       return Response.json({ ok: true });
@@ -26,6 +27,9 @@ export async function POST(request: Request) {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return Response.json({ error: "Email inválido" }, { status: 400 });
+    }
+    if (body.termsAccepted !== true) {
+      return Response.json({ error: "Tenés que aceptar los términos y condiciones" }, { status: 400 });
     }
 
     const course = await getCourseById(body.courseId);

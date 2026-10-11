@@ -1,6 +1,6 @@
 import type { LandingSettings } from "@/lib/sanity/types";
 
-type LegalFields = Pick<
+export type LegalFields = Pick<
   LandingSettings,
   "legalName" | "legalCuit" | "legalRegistration" | "legalAddress" | "privacyEmail" | "contactEmail" | "privacyPolicy"
 >;
@@ -60,8 +60,8 @@ Este sitio solo usa cookies estrictamente necesarias para funcionar: mantener la
 ## Cambios en esta política
 Si cambiamos esta política, publicaremos la nueva versión en esta página.`;
 
-/** Reemplaza los marcadores del texto (base o editado en el panel) con los datos institucionales. */
-export function resolvePrivacyPolicy(settings: LegalFields) {
+/** Reemplaza los marcadores de un texto legal (base o editado en el panel) con los datos institucionales. */
+export function resolveLegalText(source: string, settings: Omit<LegalFields, "privacyPolicy">) {
   const email = privacyContactEmail(settings);
   const values: Record<string, string> = {
     "{razonSocial}": settings.legalName.trim(),
@@ -73,8 +73,11 @@ export function resolvePrivacyPolicy(settings: LegalFields) {
     "{domicilioTexto}": settings.legalAddress.trim() ? ` con domicilio en ${settings.legalAddress.trim()},` : "",
     "{emailTexto}": email ? ` escribiendo a ${email}` : " a través del formulario de contacto",
   };
-  const source = settings.privacyPolicy.trim() || DEFAULT_PRIVACY_POLICY;
   return source.replace(/\{[a-zA-Z]+\}/g, (token) => values[token] ?? token);
+}
+
+export function resolvePrivacyPolicy(settings: LegalFields) {
+  return resolveLegalText(settings.privacyPolicy.trim() || DEFAULT_PRIVACY_POLICY, settings);
 }
 
 export type LegalBlock =

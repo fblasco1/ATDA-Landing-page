@@ -45,6 +45,7 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
     legalAddress: "Datos institucionales: domicilio",
     privacyEmail: "Datos institucionales: email de privacidad",
     privacyPolicy: "Política de privacidad",
+    termsText: "Términos y condiciones",
   },
   project: {
     title: "Título",

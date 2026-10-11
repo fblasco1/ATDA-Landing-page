@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ATDALogo, InstagramIcon, LinkedInIcon, MailIcon, TwitterIcon } from "@/components/Icons";
 import { institutionalLine } from "@/lib/legal/privacy";
+import { CONSUMER_PROTECTION_URL } from "@/lib/legal/terms";
 import type { LandingSettings } from "@/lib/sanity/types";
 
 export function Footer({ settings }: { settings: LandingSettings }) {
@@ -50,9 +51,19 @@ export function Footer({ settings }: { settings: LandingSettings }) {
           aria-label="Información legal"
           className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-400"
         >
+          <Link href="/terminos" className="hover:text-white">
+            Términos y condiciones
+          </Link>
           <Link href="/privacidad" className="hover:text-white">
             Política de privacidad
           </Link>
+          <Link href="/arrepentimiento" className="hover:text-white">
+            Botón de arrepentimiento
+          </Link>
+          <a href={CONSUMER_PROTECTION_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+            Defensa de las y los consumidores. Para reclamos ingrese aquí
+            <span className="sr-only"> (se abre en una pestaña nueva)</span>
+          </a>
           {settings.statuteUrl ? (
             <a href={settings.statuteUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white">
               Estatuto<span className="sr-only"> (se abre en una pestaña nueva)</span>

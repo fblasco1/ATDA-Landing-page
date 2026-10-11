@@ -93,6 +93,7 @@ export const defaultLandingSettings: LandingSettings = {
   legalAddress: "",
   privacyEmail: "",
   privacyPolicy: "",
+  termsText: "",
 };
 
 /** Nombres de secciones y menú: si quedan vacíos se usa el texto por defecto para no dejar huecos. */

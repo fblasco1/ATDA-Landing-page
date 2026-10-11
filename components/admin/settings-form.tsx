@@ -5,6 +5,7 @@ import { HeroImagesInput } from "@/components/admin/hero-images-input";
 import { IconPicker } from "@/components/admin/icon-picker";
 import { heroImages } from "@/components/landing/hero";
 import { DEFAULT_PRIVACY_POLICY, PRIVACY_PLACEHOLDERS } from "@/lib/legal/privacy";
+import { DEFAULT_TERMS } from "@/lib/legal/terms";
 import type { LandingSettings } from "@/lib/sanity/types";
 
 const SECTION_FIELDS = [
@@ -90,18 +91,31 @@ function buildPayload(form: FormData) {
     legalAddress: form.get("legalAddress"),
     privacyEmail: form.get("privacyEmail"),
     privacyPolicy: form.get("privacyPolicy"),
+    termsText: form.get("termsText"),
   };
 }
 
-function PrivacyPolicyInput({ defaultValue, onChange }: { defaultValue: string; onChange: () => void }) {
+function LegalTextInput({
+  name,
+  label,
+  baseText,
+  defaultValue,
+  onChange,
+}: {
+  name: string;
+  label: string;
+  baseText: string;
+  defaultValue: string;
+  onChange: () => void;
+}) {
   const ref = useRef<HTMLTextAreaElement>(null);
   return (
     <div className="space-y-2">
       <label className="block">
-        <span className="mb-1 block text-sm text-gray-400">Texto de la política de privacidad</span>
+        <span className="mb-1 block text-sm text-gray-400">{label}</span>
         <textarea
           ref={ref}
-          name="privacyPolicy"
+          name={name}
           defaultValue={defaultValue}
           rows={12}
           placeholder="Vacío: se publica el texto base con los datos institucionales de arriba."
@@ -117,7 +131,7 @@ function PrivacyPolicyInput({ defaultValue, onChange }: { defaultValue: string; 
         onClick={() => {
           if (!ref.current) return;
           if (ref.current.value.trim() && !window.confirm("¿Reemplazar el texto actual por el texto base?")) return;
-          ref.current.value = DEFAULT_PRIVACY_POLICY;
+          ref.current.value = baseText;
           onChange();
         }}
         className="rounded-md border border-gray-600 px-3 py-1.5 text-sm text-gray-200 hover:border-gray-400 hover:text-white"
@@ -298,9 +312,10 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
         <AdminInput name="statuteUrl" label="Estatuto" defaultValue={initial.statuteUrl ?? ""} />
       </fieldset>
       <fieldset className="space-y-3 rounded-lg border border-gray-800 p-4">
-        <legend className="px-2 text-lg font-semibold text-white">Datos institucionales y privacidad</legend>
+        <legend className="px-2 text-lg font-semibold text-white">Datos institucionales y textos legales</legend>
         <p className="text-sm text-gray-400">
-          Se muestran en el footer y en la página <code>/privacidad</code>. Usá la razón social exacta del estatuto.
+          Se muestran en el footer y en las páginas <code>/privacidad</code> y <code>/terminos</code>. Usá la razón
+          social exacta del estatuto. Si un texto queda vacío se publica el texto base.
         </p>
         <div className="grid gap-3 md:grid-cols-2">
           <AdminInput name="legalName" label="Razón social" defaultValue={initial.legalName} />
@@ -317,8 +332,21 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
             defaultValue={initial.privacyEmail}
           />
         </div>
-        <PrivacyPolicyInput
+        <LegalTextInput
+          name="privacyPolicy"
+          label="Política de privacidad (/privacidad)"
+          baseText={DEFAULT_PRIVACY_POLICY}
           defaultValue={initial.privacyPolicy}
+          onChange={() => {
+            setDirty(true);
+            setStatus("");
+          }}
+        />
+        <LegalTextInput
+          name="termsText"
+          label="Términos y condiciones (/terminos)"
+          baseText={DEFAULT_TERMS}
+          defaultValue={initial.termsText}
           onChange={() => {
             setDirty(true);
             setStatus("");

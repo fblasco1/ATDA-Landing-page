@@ -154,6 +154,26 @@ export const contentPreviews = pgTable("content_previews", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Pedidos del Botón de arrepentimiento (Res. SCI 424/2020). */
+export const withdrawalRequests = pgTable(
+  "withdrawal_requests",
+  {
+    id: serial("id").primaryKey(),
+    /** Código de seguimiento que se le informa a la persona. */
+    code: varchar("code", { length: 16 }).notNull(),
+    fullName: varchar("full_name", { length: 200 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    dni: varchar("dni", { length: 32 }).notNull(),
+    /** Curso o actividad que quiere revocar, tal como lo escribió. */
+    purchase: varchar("purchase", { length: 255 }).notNull(),
+    details: text("details"),
+    /** received | processed */
+    status: varchar("status", { length: 16 }).notNull().default("received"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("withdrawal_requests_code_uidx").on(table.code)],
+);
+
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type ContentRevision = typeof contentRevisions.$inferSelect;
 export type MembershipRequest = typeof membershipRequests.$inferSelect;
