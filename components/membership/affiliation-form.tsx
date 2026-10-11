@@ -178,4 +178,4 @@ function Field({
 }
 
 const inputClass =
-  "w-full rounded-md border border-gray-700 bg-gray-950 p-3 text-white placeholder:text-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-60";
+  "w-full rounded-md border border-gray-500 bg-gray-950 p-3 text-white placeholder:text-gray-400 focus:border-blue-500 focus:outline-none disabled:opacity-60";

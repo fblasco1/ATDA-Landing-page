@@ -15,7 +15,7 @@ export default async function PrivacyPage() {
 
   return (
     <div className="min-h-screen bg-gray-950">
-      <main className="px-6 py-12 md:py-16">
+      <main id="contenido" tabIndex={-1} className="px-6 py-12 md:py-16">
         <article className="container mx-auto max-w-3xl">
           <h1 className="text-4xl font-extrabold leading-tight text-white md:text-5xl">Política de privacidad</h1>
           {institution ? <p className="mt-4 text-sm text-gray-400">{institution}</p> : null}

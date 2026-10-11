@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { cloneElement, useState } from "react";
 import { PrivacyConsent } from "@/components/legal/privacy-consent";
 import type { LandingSettings } from "@/lib/sanity/types";
 import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-band";
@@ -50,7 +50,7 @@ export function Contact({
     }
     if (!privacyAccepted) errors.privacyAccepted = "Tenés que aceptar la política de privacidad.";
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return errors;
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -59,7 +59,12 @@ export function Contact({
       setStatus("success");
       return;
     }
-    if (!validate()) return;
+    const errors = validate();
+    const firstInvalid = FIELD_ORDER.find((key) => errors[key]);
+    if (firstInvalid) {
+      document.getElementById(FIELD_IDS[firstInvalid] ?? firstInvalid)?.focus();
+      return;
+    }
     if (!settings.formspreeEndpoint) {
       setStatus("error");
       return;
@@ -89,6 +94,7 @@ export function Contact({
   };
 
   const disabled = status === "submitting" || status === "success";
+  const errorCount = Object.keys(fieldErrors).length;
 
   return (
     <section id="contact" className={`${sectionBandClass(band)} py-20`}>
@@ -96,7 +102,7 @@ export function Contact({
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-extrabold text-white md:text-4xl">{settings.contactTitle}</h2>
           <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{settings.contactSubtitle}</p>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-500">
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-400">
             ¿Querés asociarte?{" "}
             <Link href="/asociacion" className="font-medium text-teal-300 hover:text-teal-200">
               Completá la solicitud de asociación
@@ -233,11 +239,15 @@ export function Contact({
                 </button>
               )}
             </div>
-            {status === "error" ? (
-              <p className="mt-4 text-center text-red-400" role="alert">
-                No se pudo enviar el mensaje. Revisá los datos o intentá más tarde.
-              </p>
-            ) : null}
+            <div role="alert" className="mt-4 text-center text-red-400">
+              {errorCount > 0 ? (
+                <p>
+                  {errorCount === 1 ? "Revisá el campo marcado." : `Revisá los ${errorCount} campos marcados.`}
+                </p>
+              ) : status === "error" ? (
+                <p>No se pudo enviar el mensaje. Revisá los datos o intentá más tarde.</p>
+              ) : null}
+            </div>
           </form>
         </div>
       </div>
@@ -245,8 +255,11 @@ export function Contact({
   );
 }
 
+const FIELD_ORDER = ["name", "email", "phone", "_subject", "message", "privacyAccepted"];
+const FIELD_IDS: Record<string, string> = { _subject: "subject" };
+
 const inputClass =
-  "w-full rounded-md border border-gray-600 bg-gray-700 p-3 text-white transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60";
+  "w-full rounded-md border border-gray-500 bg-gray-900 p-3 text-white placeholder:text-gray-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60";
 
 function Field({
   label,
@@ -257,16 +270,17 @@ function Field({
   label: string;
   htmlFor: string;
   error?: string;
-  children: React.ReactNode;
+  children: React.ReactElement<{ "aria-describedby"?: string }>;
 }) {
+  const errorId = `${htmlFor}-error`;
   return (
     <div>
       <label htmlFor={htmlFor} className="mb-2 block font-medium text-gray-300">
         {label}
       </label>
-      {children}
+      {cloneElement(children, { "aria-describedby": error ? errorId : undefined })}
       {error ? (
-        <p className="mt-1 text-sm text-red-400" role="alert">
+        <p id={errorId} className="mt-1 text-sm text-red-400">
           {error}
         </p>
       ) : null}

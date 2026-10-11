@@ -18,7 +18,7 @@ function PartnerTile({ partner }: { partner: NetworkPartner }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={partner.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
         ) : (
-          <span className="text-2xl font-bold text-slate-400">{partner.name.slice(0, 1)}</span>
+          <span className="text-2xl font-bold text-slate-600">{partner.name.slice(0, 1)}</span>
         )}
       </div>
       <p className="mt-4 max-w-[13rem] text-center text-sm font-semibold leading-snug text-white sm:text-base">

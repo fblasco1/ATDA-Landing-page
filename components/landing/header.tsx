@@ -49,7 +49,7 @@ function scrollToHash(href: string) {
 }
 
 const secondaryButtonClass =
-  "rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-gray-400 hover:bg-white/5 hover:text-white";
+  "rounded-lg border border-gray-500 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-gray-400 hover:bg-white/5 hover:text-white";
 
 const primaryButtonClass =
   "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700";
@@ -93,6 +93,15 @@ export function Header({
       clearTimeout(timer);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen]);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -210,6 +219,7 @@ export function Header({
             className="rounded-md p-1 text-gray-300 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 lg:hidden"
             aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={isOpen}
+            aria-controls="menu-mobile"
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isOpen ? (
@@ -223,8 +233,9 @@ export function Header({
       </div>
 
       <div
+        id="menu-mobile"
         className={`absolute inset-x-0 top-full overflow-hidden shadow-lg transition-all duration-300 ease-in-out lg:hidden ${
-          isOpen ? "max-h-screen opacity-100" : "pointer-events-none max-h-0 opacity-0"
+          isOpen ? "visible max-h-screen opacity-100" : "pointer-events-none invisible max-h-0 opacity-0"
         }`}
       >
         <div className="flex flex-col items-center gap-4 border-t border-gray-800 bg-gray-900 px-6 py-5">
