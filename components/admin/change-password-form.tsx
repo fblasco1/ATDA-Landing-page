@@ -9,6 +9,7 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
   const { update } = useSession();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,7 +28,9 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
         setBusy(false);
         return;
       }
+      setSaved(true);
       await update();
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       router.replace("/admin");
       router.refresh();
     } catch {
@@ -75,12 +78,17 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
           {error}
         </p>
       ) : null}
+      {saved ? (
+        <p className="text-sm text-teal-300" role="status">
+          Contraseña actualizada. Te llevamos al panel…
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={busy}
         className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
       >
-        {busy ? "Guardando…" : "Guardar contraseña"}
+        {saved ? "Contraseña guardada" : busy ? "Guardando…" : "Guardar contraseña"}
       </button>
       {forced ? (
         <button

@@ -5,7 +5,8 @@ import { IconPicker } from "@/components/admin/icon-picker";
 import type { LandingSettings } from "@/lib/sanity/types";
 
 export function SettingsForm({ initial }: { initial: LandingSettings }) {
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<"" | "saved" | "error">("");
+  const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -54,7 +55,8 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
       body: JSON.stringify(payload),
     });
     setSaving(false);
-    setStatus(response.ok ? "Guardado" : "No se pudo guardar");
+    setStatus(response.ok ? "saved" : "error");
+    if (response.ok) setDirty(false);
   };
 
   const aboutValues =
@@ -70,7 +72,14 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
         ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form
+      onSubmit={handleSubmit}
+      onChange={() => {
+        setDirty(true);
+        setStatus("");
+      }}
+      className="space-y-8"
+    >
       <fieldset className="space-y-3 rounded-lg border border-gray-800 p-4">
         <legend className="px-2 text-lg font-semibold text-white">Hero</legend>
         <AdminInput name="heroTitle" label="Título" defaultValue={initial.heroTitle} />
@@ -120,14 +129,24 @@ export function SettingsForm({ initial }: { initial: LandingSettings }) {
         <AdminInput name="contactEmail" label="Email (mailto:)" defaultValue={initial.contactEmail ?? ""} />
         <AdminInput name="statuteUrl" label="Estatuto" defaultValue={initial.statuteUrl ?? ""} />
       </fieldset>
-      <button
-        type="submit"
-        disabled={saving}
-        className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
-      >
-        {saving ? "Guardando..." : "Guardar contenido"}
-      </button>
-      {status ? <p className="text-teal-300">{status}</p> : null}
+      <div className="sticky bottom-0 -mx-2 flex flex-wrap items-center gap-4 border-t border-gray-800 bg-gray-950/95 px-2 py-4 backdrop-blur">
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
+        >
+          {saving ? "Guardando..." : "Guardar contenido"}
+        </button>
+        <p role="status" className="text-sm">
+          {saving ? null : dirty ? (
+            <span className="text-amber-300">Tenés cambios sin guardar</span>
+          ) : status === "saved" ? (
+            <span className="text-teal-300">Guardado. Ya se ve en el sitio.</span>
+          ) : status === "error" ? (
+            <span className="text-red-400">No se pudo guardar</span>
+          ) : null}
+        </p>
+      </div>
     </form>
   );
 }

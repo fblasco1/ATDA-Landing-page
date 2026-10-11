@@ -146,7 +146,12 @@ export function CollectionManager({
 
   return (
     <div className="space-y-8">
-      <form key={formKey} onSubmit={handleCreate} className="space-y-3 rounded-lg border border-gray-800 p-4">
+      <form
+        key={formKey}
+        onSubmit={handleCreate}
+        onChange={() => setStatus("")}
+        className="space-y-3 rounded-lg border border-gray-800 p-4"
+      >
         <h3 className="font-semibold text-white">Nuevo</h3>
         <FieldGrid fields={fields} categorySuggestions={categorySuggestions} />
         <button type="submit" className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
@@ -178,7 +183,7 @@ export function CollectionManager({
               </div>
             </div>
             {editingId === row._id && editing ? (
-              <form onSubmit={handleUpdate} className="mt-4 space-y-3">
+              <form onSubmit={handleUpdate} onChange={() => setStatus("")} className="mt-4 space-y-3">
                 <FieldGrid fields={fields} values={editing} categorySuggestions={categorySuggestions} />
                 <button type="submit" className="rounded-md bg-teal-600 px-4 py-2 text-white">
                   Guardar cambios
