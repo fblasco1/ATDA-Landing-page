@@ -16,9 +16,10 @@ export async function createMembershipRequest(input: {
   email: string;
   dni: string;
   phone: string;
+  profession: string;
   organization?: string;
   roleTitle?: string;
-  motivation: string;
+  motivation?: string;
 }) {
   const db = getDb();
   const [row] = await db
@@ -28,9 +29,10 @@ export async function createMembershipRequest(input: {
       email: input.email.toLowerCase(),
       dni: input.dni,
       phone: input.phone,
+      profession: input.profession,
       organization: input.organization || null,
       roleTitle: input.roleTitle || null,
-      motivation: input.motivation,
+      motivation: input.motivation || null,
       status: "received",
     })
     .returning();
@@ -95,6 +97,7 @@ export async function approveMembershipRequest(id: number, adminNotes?: string) 
         fullName: request.fullName,
         dni: request.dni,
         phone: request.phone,
+        profession: request.profession,
         organization: request.organization,
         roleTitle: request.roleTitle,
         status: "active",
@@ -162,6 +165,7 @@ export async function updateMember(
   patch: Partial<{
     fullName: string;
     phone: string | null;
+    profession: string | null;
     organization: string | null;
     roleTitle: string | null;
     status: Member["status"];

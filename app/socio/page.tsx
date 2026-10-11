@@ -44,6 +44,7 @@ export default async function SocioDashboardPage() {
             <Item label="Email" value={member.email} />
             <Item label="DNI" value={member.dni} />
             <Item label="Teléfono" value={member.phone || "—"} />
+            <Item label="Profesión" value={member.profession || "—"} />
             <Item label="Organización" value={member.organization || "—"} />
             <Item label="Estado" value={STATUS_LABEL[member.status] ?? member.status} />
           </dl>

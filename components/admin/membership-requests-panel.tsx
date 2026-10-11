@@ -118,6 +118,7 @@ export function MembershipRequestsPanel({
                     <div className="text-xs text-gray-500">
                       DNI {row.dni} · {row.phone}
                     </div>
+                    {row.profession ? <div className="text-xs text-gray-400">{row.profession}</div> : null}
                     {row.organization ? (
                       <div className="text-xs text-gray-500">
                         {row.organization}
@@ -126,7 +127,7 @@ export function MembershipRequestsPanel({
                     ) : null}
                   </td>
                   <td className="max-w-xs p-3 text-gray-400">
-                    <p className="line-clamp-4">{row.motivation}</p>
+                    <p className="line-clamp-4">{row.motivation || "—"}</p>
                     {row.adminNotes ? (
                       <p className="mt-2 text-xs text-amber-200/80">Notas: {row.adminNotes}</p>
                     ) : null}

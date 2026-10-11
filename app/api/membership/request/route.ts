@@ -35,21 +35,16 @@ export async function POST(request: Request) {
     const email = clean(body.email as FormDataEntryValue).toLowerCase();
     const dni = clean(body.dni as FormDataEntryValue);
     const phone = clean(body.phone as FormDataEntryValue);
+    const profession = clean(body.profession as FormDataEntryValue);
     const organization = clean(body.organization as FormDataEntryValue);
     const roleTitle = clean(body.roleTitle as FormDataEntryValue);
     const motivation = clean(body.motivation as FormDataEntryValue);
 
-    if (!fullName || !email || !dni || !phone || !motivation) {
+    if (!fullName || !email || !dni || !phone || !profession) {
       return NextResponse.json({ error: "Completá los campos obligatorios." }, { status: 400 });
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Email inválido." }, { status: 400 });
-    }
-    if (motivation.length < 20) {
-      return NextResponse.json(
-        { error: "Contanos un poco más sobre tu motivación (mínimo 20 caracteres)." },
-        { status: 400 },
-      );
     }
 
     const existing = await findOpenRequestByEmail(email);
@@ -65,9 +60,10 @@ export async function POST(request: Request) {
       email,
       dni,
       phone,
+      profession,
       organization: organization || undefined,
       roleTitle: roleTitle || undefined,
-      motivation,
+      motivation: motivation || undefined,
     });
 
     return NextResponse.json({ ok: true, id: row.id });

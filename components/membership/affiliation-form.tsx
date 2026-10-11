@@ -45,31 +45,82 @@ export function AffiliationForm() {
     >
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Nombre y apellido" htmlFor="fullName" required>
-          <input id="fullName" name="fullName" required disabled={disabled} className={inputClass} />
+          <input
+            id="fullName"
+            name="fullName"
+            autoComplete="name"
+            required
+            disabled={disabled}
+            className={inputClass}
+          />
         </Field>
         <Field label="Email" htmlFor="email" required>
-          <input id="email" name="email" type="email" required disabled={disabled} className={inputClass} />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            disabled={disabled}
+            className={inputClass}
+          />
         </Field>
         <Field label="DNI" htmlFor="dni" required>
-          <input id="dni" name="dni" required disabled={disabled} className={inputClass} />
+          <input
+            id="dni"
+            name="dni"
+            inputMode="numeric"
+            autoComplete="off"
+            required
+            disabled={disabled}
+            className={inputClass}
+          />
         </Field>
         <Field label="Teléfono" htmlFor="phone" required>
-          <input id="phone" name="phone" type="tel" required disabled={disabled} className={inputClass} />
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            required
+            disabled={disabled}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Profesión" htmlFor="profession" required>
+          <input
+            id="profession"
+            name="profession"
+            autoComplete="off"
+            required
+            disabled={disabled}
+            className={inputClass}
+          />
         </Field>
         <Field label="Organización / empresa (opcional)" htmlFor="organization">
-          <input id="organization" name="organization" disabled={disabled} className={inputClass} />
+          <input
+            id="organization"
+            name="organization"
+            autoComplete="organization"
+            disabled={disabled}
+            className={inputClass}
+          />
         </Field>
         <Field label="Cargo / rol (opcional)" htmlFor="roleTitle">
-          <input id="roleTitle" name="roleTitle" disabled={disabled} className={inputClass} />
+          <input
+            id="roleTitle"
+            name="roleTitle"
+            autoComplete="organization-title"
+            disabled={disabled}
+            className={inputClass}
+          />
         </Field>
       </div>
-      <Field label="¿Por qué querés sumarte a ATDA?" htmlFor="motivation" required>
+      <Field label="¿Por qué querés sumarte a ATDA? (opcional)" htmlFor="motivation">
         <textarea
           id="motivation"
           name="motivation"
-          required
           rows={5}
-          minLength={20}
           disabled={disabled}
           className={inputClass}
           placeholder="Contanos tu vínculo con la tecnología, la industria o el desarrollo productivo…"

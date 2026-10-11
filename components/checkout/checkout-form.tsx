@@ -45,10 +45,10 @@ export function CheckoutForm({ course }: { course: Course }) {
       <p className="text-lg text-gray-300">
         Importe: <span className="font-bold text-white">{formatARS(course.price)}</span>
       </p>
-      <Input name="name" label="Nombre y apellido" required />
-      <Input name="email" type="email" label="Email" required />
-      <Input name="dni" label="DNI" required />
-      <Input name="phone" type="tel" label="Teléfono" required />
+      <Input name="name" label="Nombre y apellido" autoComplete="name" required />
+      <Input name="email" type="email" label="Email" autoComplete="email" required />
+      <Input name="dni" label="DNI" autoComplete="off" required />
+      <Input name="phone" type="tel" label="Teléfono" autoComplete="tel" required />
       <div className="rounded-lg border border-gray-700 p-4 text-left">
         <p className="font-semibold text-white">Pago con MODO</p>
         <p className="mt-1 text-sm text-gray-400">
@@ -75,11 +75,13 @@ function Input({
   name,
   label,
   type = "text",
+  autoComplete,
   required,
 }: {
   name: string;
   label: string;
   type?: string;
+  autoComplete?: string;
   required?: boolean;
 }) {
   return (
@@ -88,6 +90,7 @@ function Input({
       <input
         name={name}
         type={type}
+        autoComplete={autoComplete}
         required={required}
         className="w-full rounded-md border border-gray-600 bg-gray-700 p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       />

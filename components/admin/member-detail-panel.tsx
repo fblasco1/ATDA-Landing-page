@@ -76,6 +76,9 @@ export function MemberDetailPanel({
         <p className="text-gray-400">
           {member.email} · DNI {member.dni} · {STATUS_LABEL[member.status]}
         </p>
+        <p className="text-sm text-gray-500">
+          {[member.profession, member.phone, member.organization, member.roleTitle].filter(Boolean).join(" · ")}
+        </p>
         {message ? <p className="mt-2 text-sm text-teal-300">{message}</p> : null}
       </div>
 
