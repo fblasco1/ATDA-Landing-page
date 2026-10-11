@@ -16,9 +16,13 @@ export async function POST(request: Request) {
       email?: string;
       dni?: string;
       phone?: string;
+      termsAccepted?: boolean;
     };
     if (!body.courseId || !body.name || !body.email || !body.dni || !body.phone) {
       return Response.json({ error: "Completá todos los datos" }, { status: 400 });
+    }
+    if (body.termsAccepted !== true) {
+      return Response.json({ error: "Tenés que aceptar los términos y condiciones" }, { status: 400 });
     }
 
     const course = await getCourseById(body.courseId);

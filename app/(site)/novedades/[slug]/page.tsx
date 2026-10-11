@@ -34,7 +34,7 @@ export default async function ActivityArticlePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-950">
-      <main className="px-6 py-12 md:py-16">
+      <main id="contenido" tabIndex={-1} className="px-6 py-12 md:py-16">
         <article className="container mx-auto max-w-3xl">
           <Link
             href="/novedades"

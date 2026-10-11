@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { isFreeCourse, priceModeOf } from "@/lib/courses/pricing";
 import { formatARS } from "@/lib/utils";
 import type { Course } from "@/lib/sanity/types";
+import { buttonClass } from "@/components/ui/button";
 
 export function CheckoutForm({ course }: { course: Course }) {
   const free = isFreeCourse(course);
@@ -22,6 +24,7 @@ export function CheckoutForm({ course }: { course: Course }) {
       dni: String(form.get("dni") ?? ""),
       phone: String(form.get("phone") ?? ""),
       website: String(form.get("website") ?? ""),
+      termsAccepted: form.get("termsAccepted") === "on",
     };
 
     try {
@@ -65,12 +68,34 @@ export function CheckoutForm({ course }: { course: Course }) {
       <Input name="email" type="email" label="Email" autoComplete="email" required />
       <Input name="dni" label="DNI" autoComplete="off" required />
       <Input name="phone" type="tel" label="Teléfono" autoComplete="tel" required />
-      <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+      <div hidden>
         <label>
           Sitio web
           <input name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
+      <label htmlFor="termsAccepted" className="flex items-start gap-3 text-left text-sm text-gray-300">
+        <input
+          id="termsAccepted"
+          name="termsAccepted"
+          type="checkbox"
+          required
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-500 bg-gray-900 accent-blue-600"
+        />
+        <span>
+          Leí y acepto los{" "}
+          <Link href="/terminos" target="_blank" className="font-medium text-teal-300 underline underline-offset-2">
+            términos y condiciones
+            <span className="sr-only"> (se abre en una pestaña nueva)</span>
+          </Link>{" "}
+          y la{" "}
+          <Link href="/privacidad" target="_blank" className="font-medium text-teal-300 underline underline-offset-2">
+            política de privacidad
+            <span className="sr-only"> (se abre en una pestaña nueva)</span>
+          </Link>
+          .
+        </span>
+      </label>
       {free ? null : (
         <div className="rounded-lg border border-gray-700 p-4 text-left">
           <p className="font-semibold text-white">Pago con MODO</p>
@@ -84,7 +109,7 @@ export function CheckoutForm({ course }: { course: Course }) {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
+        className={buttonClass({ className: "w-full" })}
       >
         {free
           ? status === "submitting"
@@ -95,8 +120,13 @@ export function CheckoutForm({ course }: { course: Course }) {
             : "Pagar con MODO"}
       </button>
       {free ? null : (
-        <p className="text-xs text-gray-500">
-          El acceso al aula virtual lo asigna un administrador de ATDA después de acreditar el pago.
+        <p className="text-sm text-gray-400">
+          El acceso al aula virtual lo asigna un administrador de ATDA después de acreditar el pago. Tenés 10 días para
+          arrepentirte desde el{" "}
+          <Link href="/arrepentimiento" className="text-teal-300 underline underline-offset-2">
+            botón de arrepentimiento
+          </Link>
+          .
         </p>
       )}
     </form>
@@ -149,7 +179,7 @@ function Input({
         type={type}
         autoComplete={autoComplete}
         required={required}
-        className="w-full rounded-md border border-gray-600 bg-gray-700 p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full rounded-md border border-gray-500 bg-gray-900 p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </label>
   );

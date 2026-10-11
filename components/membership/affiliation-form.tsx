@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { PrivacyConsent } from "@/components/legal/privacy-consent";
+import { buttonClass } from "@/components/ui/button";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -127,8 +129,10 @@ export function AffiliationForm() {
         />
       </Field>
 
+      <PrivacyConsent disabled={disabled} />
+
       {/* Honeypot */}
-      <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+      <div hidden>
         <label>
           Sitio web
           <input name="website" tabIndex={-1} autoComplete="off" />
@@ -138,7 +142,7 @@ export function AffiliationForm() {
       <button
         type="submit"
         disabled={disabled}
-        className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60 md:w-auto"
+        className={buttonClass({ className: "w-full md:w-auto" })}
       >
         {status === "submitting" ? "Enviando…" : status === "success" ? "Solicitud enviada" : "Enviar solicitud"}
       </button>
@@ -175,4 +179,4 @@ function Field({
 }
 
 const inputClass =
-  "w-full rounded-md border border-gray-700 bg-gray-950 p-3 text-white placeholder:text-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-60";
+  "w-full rounded-md border border-gray-500 bg-gray-950 p-3 text-white placeholder:text-gray-400 focus:border-blue-500 focus:outline-none disabled:opacity-60";

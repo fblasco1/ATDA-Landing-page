@@ -27,7 +27,7 @@ export function ActivityCard({ project }: { project: Project }) {
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-teal-900/30 text-sm text-gray-500">
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-teal-900/30 text-sm text-gray-400">
             Sin portada
           </div>
         )}
@@ -41,7 +41,7 @@ export function ActivityCard({ project }: { project: Project }) {
         <h3 className="text-lg font-bold leading-snug text-white group-hover:text-blue-300">{project.title}</h3>
         <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-400">{project.description}</p>
         {dateLabel ? (
-          <p className="mt-4 flex items-center gap-2 text-xs text-gray-500">
+          <p className="mt-4 flex items-center gap-2 text-sm text-gray-400">
             <CalendarIcon className="h-3.5 w-3.5" />
             {dateLabel}
           </p>

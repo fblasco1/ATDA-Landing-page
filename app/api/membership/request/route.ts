@@ -47,6 +47,13 @@ export async function POST(request: Request) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Email inválido." }, { status: 400 });
     }
+    const privacyAccepted = body.privacyAccepted === true || body.privacyAccepted === "on";
+    if (!privacyAccepted) {
+      return NextResponse.json(
+        { error: "Para enviar la solicitud tenés que aceptar la política de privacidad." },
+        { status: 400 },
+      );
+    }
 
     const existing = await findOpenRequestByEmail(email);
     if (existing) {
@@ -65,6 +72,7 @@ export async function POST(request: Request) {
       organization: organization || undefined,
       roleTitle: roleTitle || undefined,
       motivation: motivation || undefined,
+      privacyAcceptedAt: new Date(),
     });
 
     after(() =>

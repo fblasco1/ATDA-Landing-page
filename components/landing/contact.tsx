@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { cloneElement, useState } from "react";
+import { PrivacyConsent } from "@/components/legal/privacy-consent";
 import type { LandingSettings } from "@/lib/sanity/types";
 import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-band";
+import { buttonClass } from "@/components/ui/button";
 
 export function Contact({
   settings,
@@ -20,6 +22,7 @@ export function Contact({
     message: "",
     website: "",
   });
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
@@ -41,13 +44,15 @@ export function Contact({
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       errors.email = "Email inválido.";
     }
-    if (formData.phone.trim().length < 6) errors.phone = "Ingresá un teléfono válido.";
+    const phone = formData.phone.trim();
+    if (phone && phone.replace(/\D/g, "").length < 6) errors.phone = "Ingresá un teléfono válido o dejalo vacío.";
     if (!formData._subject) errors._subject = "Elegí un tema.";
     if (formData.message.trim().length < 10) {
       errors.message = "El mensaje debe tener al menos 10 caracteres.";
     }
+    if (!privacyAccepted) errors.privacyAccepted = "Tenés que aceptar la política de privacidad.";
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return errors;
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -56,7 +61,12 @@ export function Contact({
       setStatus("success");
       return;
     }
-    if (!validate()) return;
+    const errors = validate();
+    const firstInvalid = FIELD_ORDER.find((key) => errors[key]);
+    if (firstInvalid) {
+      document.getElementById(FIELD_IDS[firstInvalid] ?? firstInvalid)?.focus();
+      return;
+    }
     if (!settings.formspreeEndpoint) {
       setStatus("error");
       return;
@@ -71,11 +81,12 @@ export function Contact({
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, privacyAccepted: "Sí" }),
       });
       if (response.ok) {
         setStatus("success");
         setFormData({ name: "", email: "", phone: "", _subject: "", message: "", website: "" });
+        setPrivacyAccepted(false);
       } else {
         setStatus("error");
       }
@@ -85,6 +96,7 @@ export function Contact({
   };
 
   const disabled = status === "submitting" || status === "success";
+  const errorCount = Object.keys(fieldErrors).length;
 
   return (
     <section id="contact" className={`${sectionBandClass(band)} py-20`}>
@@ -92,7 +104,7 @@ export function Contact({
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-extrabold text-white md:text-4xl">{settings.contactTitle}</h2>
           <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{settings.contactSubtitle}</p>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-500">
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-400">
             ¿Querés asociarte?{" "}
             <Link href="/asociacion" className="font-medium text-teal-300 hover:text-teal-200">
               Completá la solicitud de asociación
@@ -130,14 +142,13 @@ export function Contact({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Número de contacto" htmlFor="phone" error={fieldErrors.phone}>
+              <Field label="Teléfono (opcional)" htmlFor="phone" error={fieldErrors.phone}>
                 <input
                   id="phone"
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  required
                   autoComplete="tel"
                   disabled={disabled}
                   aria-invalid={Boolean(fieldErrors.phone)}
@@ -182,7 +193,19 @@ export function Contact({
               </Field>
             </div>
 
-            <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+            <div className="mb-6">
+              <PrivacyConsent
+                checked={privacyAccepted}
+                disabled={disabled}
+                error={fieldErrors.privacyAccepted}
+                onChange={(checked) => {
+                  setPrivacyAccepted(checked);
+                  setFieldErrors(({ privacyAccepted: _removed, ...rest }) => rest);
+                }}
+              />
+            </div>
+
+            <div hidden>
               <label>
                 Sitio web
                 <input
@@ -209,19 +232,21 @@ export function Contact({
                 <button
                   type="submit"
                   disabled={status === "submitting"}
-                  className={`rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 ${
-                    status === "submitting" ? "cursor-not-allowed opacity-70" : "hover:bg-blue-700"
-                  }`}
+                  className={buttonClass({ size: "lg" })}
                 >
                   {status === "submitting" ? "Enviando..." : "Enviar mensaje"}
                 </button>
               )}
             </div>
-            {status === "error" ? (
-              <p className="mt-4 text-center text-red-400" role="alert">
-                No se pudo enviar el mensaje. Revisá los datos o intentá más tarde.
-              </p>
-            ) : null}
+            <div role="alert" className="mt-4 text-center text-red-400">
+              {errorCount > 0 ? (
+                <p>
+                  {errorCount === 1 ? "Revisá el campo marcado." : `Revisá los ${errorCount} campos marcados.`}
+                </p>
+              ) : status === "error" ? (
+                <p>No se pudo enviar el mensaje. Revisá los datos o intentá más tarde.</p>
+              ) : null}
+            </div>
           </form>
         </div>
       </div>
@@ -229,8 +254,11 @@ export function Contact({
   );
 }
 
+const FIELD_ORDER = ["name", "email", "phone", "_subject", "message", "privacyAccepted"];
+const FIELD_IDS: Record<string, string> = { _subject: "subject" };
+
 const inputClass =
-  "w-full rounded-md border border-gray-600 bg-gray-700 p-3 text-white transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60";
+  "w-full rounded-md border border-gray-500 bg-gray-900 p-3 text-white placeholder:text-gray-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60";
 
 function Field({
   label,
@@ -241,16 +269,17 @@ function Field({
   label: string;
   htmlFor: string;
   error?: string;
-  children: React.ReactNode;
+  children: React.ReactElement<{ "aria-describedby"?: string }>;
 }) {
+  const errorId = `${htmlFor}-error`;
   return (
     <div>
       <label htmlFor={htmlFor} className="mb-2 block font-medium text-gray-300">
         {label}
       </label>
-      {children}
+      {cloneElement(children, { "aria-describedby": error ? errorId : undefined })}
       {error ? (
-        <p className="mt-1 text-sm text-red-400" role="alert">
+        <p id={errorId} className="mt-1 text-sm text-red-400">
           {error}
         </p>
       ) : null}

@@ -39,6 +39,8 @@ export const membershipRequests = pgTable("membership_requests", {
   organization: varchar("organization", { length: 255 }),
   roleTitle: varchar("role_title", { length: 255 }),
   motivation: text("motivation"),
+  /** Constancia del consentimiento a la política de privacidad (Ley 25.326). Nula en solicitudes previas. */
+  privacyAcceptedAt: timestamp("privacy_accepted_at", { withTimezone: true }),
   status: membershipRequestStatusEnum("status").notNull().default("received"),
   adminNotes: text("admin_notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -151,6 +153,26 @@ export const contentPreviews = pgTable("content_previews", {
   createdBy: varchar("created_by", { length: 255 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Pedidos del Botón de arrepentimiento (Res. SCI 424/2020). */
+export const withdrawalRequests = pgTable(
+  "withdrawal_requests",
+  {
+    id: serial("id").primaryKey(),
+    /** Código de seguimiento que se le informa a la persona. */
+    code: varchar("code", { length: 16 }).notNull(),
+    fullName: varchar("full_name", { length: 200 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    dni: varchar("dni", { length: 32 }).notNull(),
+    /** Curso o actividad que quiere revocar, tal como lo escribió. */
+    purchase: varchar("purchase", { length: 255 }).notNull(),
+    details: text("details"),
+    /** received | processed */
+    status: varchar("status", { length: 16 }).notNull().default("received"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("withdrawal_requests_code_uidx").on(table.code)],
+);
 
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type ContentRevision = typeof contentRevisions.$inferSelect;
