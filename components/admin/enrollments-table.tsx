@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { formatARS } from "@/lib/utils";
-import type { Enrollment } from "@/lib/sanity/types";
+import type { Course, Enrollment } from "@/lib/sanity/types";
+import { NewEnrollmentForm } from "./new-enrollment-form";
 
 const PAYMENT_STATUS_OPTIONS = [
   { value: "all", label: "Todos" },
@@ -22,7 +23,13 @@ function normalize(value: string | undefined | null) {
     .trim();
 }
 
-export function EnrollmentsTable({ items }: { items: Enrollment[] }) {
+const PROVIDER_LABEL: Record<Enrollment["provider"], string> = {
+  modo: "MODO",
+  free: "—",
+  manual: "Manual",
+};
+
+export function EnrollmentsTable({ items, courses: allCourses }: { items: Enrollment[]; courses: Course[] }) {
   const [rows, setRows] = useState(items);
   const [courseFilter, setCourseFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -73,6 +80,13 @@ export function EnrollmentsTable({ items }: { items: Enrollment[] }) {
 
   return (
     <div className="space-y-4">
+      <NewEnrollmentForm
+        courses={allCourses}
+        onCreated={(enrollment) => {
+          setRows((current) => [enrollment, ...current]);
+          setMessage("Inscripción creada");
+        }}
+      />
       <div className="grid gap-3 md:grid-cols-3">
         <label className="text-sm text-gray-400">
           Curso
@@ -149,7 +163,7 @@ export function EnrollmentsTable({ items }: { items: Enrollment[] }) {
                     {row.buyer?.isMember ? <div className="text-xs text-teal-300">Socio/a</div> : null}
                   </td>
                   <td className="p-3">{row.provider === "free" ? "Sin cargo" : formatARS(row.amount)}</td>
-                  <td className="p-3">{row.provider === "free" ? "—" : "MODO"}</td>
+                  <td className="p-3">{PROVIDER_LABEL[row.provider] ?? row.provider}</td>
                   <td className="p-3">{row.status}</td>
                   <td className="p-3">
                     {row.classroomAccess === "granted" ? "Asignada" : "Pendiente"}

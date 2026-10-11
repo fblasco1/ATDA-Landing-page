@@ -122,6 +122,48 @@ export async function approveMembershipRequest(id: number, adminNotes?: string) 
   return { request: updated, member };
 }
 
+/** Alta manual desde el panel, sin solicitud previa. */
+export async function createMember(input: {
+  fullName: string;
+  email: string;
+  dni: string;
+  phone?: string;
+  profession?: string;
+  organization?: string;
+  roleTitle?: string;
+  status?: Member["status"];
+  notes?: string;
+}) {
+  const db = getDb();
+  const email = input.email.toLowerCase();
+  const [duplicate] = await db
+    .select({ email: members.email, dni: members.dni })
+    .from(members)
+    .where(or(eq(members.email, email), eq(members.dni, input.dni)))
+    .limit(1);
+  if (duplicate) {
+    throw new Error(
+      duplicate.email === email ? "Ya existe un socio con ese email." : "Ya existe un socio con ese DNI.",
+    );
+  }
+
+  const [row] = await db
+    .insert(members)
+    .values({
+      email,
+      fullName: input.fullName,
+      dni: input.dni,
+      phone: input.phone || null,
+      profession: input.profession || null,
+      organization: input.organization || null,
+      roleTitle: input.roleTitle || null,
+      status: input.status ?? "active",
+      notes: input.notes || null,
+    })
+    .returning();
+  return row;
+}
+
 export async function listMembers(filters?: {
   status?: Member["status"];
   q?: string;

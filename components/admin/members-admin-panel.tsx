@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Member, MembershipFee } from "@/lib/db/schema";
 import { formatARS } from "@/lib/utils";
+import { NewMemberForm } from "./new-member-form";
 
 type Row = {
   member: Member;
@@ -103,6 +104,12 @@ export function MembersAdminPanel({
 
   return (
     <div className="space-y-4">
+      <NewMemberForm
+        onCreated={(member) => {
+          setItems((current) => [{ member, latestFee: null, feesCount: 0 }, ...current]);
+          setMessage(`Socio ${member.fullName} creado`);
+        }}
+      />
       <div className="flex flex-wrap items-center gap-3">
         <input
           value={q}

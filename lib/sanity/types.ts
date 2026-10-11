@@ -1,6 +1,6 @@
 export type FocusIcon = string;
 export type ValueIcon = string;
-export type PaymentProvider = "modo" | "free";
+export type PaymentProvider = "modo" | "free" | "manual";
 export type PaymentStatus = "pending" | "paid" | "failed" | "expired" | "underpaid" | "overpaid";
 export type ClassroomAccess = "pending" | "granted";
 
