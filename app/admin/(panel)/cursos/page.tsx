@@ -8,8 +8,9 @@ export default async function AdminCoursesPage() {
     <div>
       <h1 className="mb-2 text-3xl font-bold text-white">Propuestas</h1>
       <p className="mb-6 text-gray-400">
-        Cursos y actividades. Se muestran en la sección Propuestas de la landing y en /propuestas si están activos y
-        tienen precio. Las categorías se crean al vuelo y sirven para filtrar.
+        Cursos y actividades. Se muestran en la sección Propuestas de la landing y en /propuestas. Los inactivos quedan
+        como historial: aparecen al final, en gris y sin inscripción. Las categorías se crean al vuelo y sirven para
+        filtrar.
       </p>
       <CollectionManager
         type="course"

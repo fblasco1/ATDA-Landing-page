@@ -22,7 +22,7 @@ export default async function AdminHomePage() {
       ) : null}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Stat label="Novedades publicadas" value={content.projects.length} />
-        <Stat label="Propuestas activas" value={content.courses.length} />
+        <Stat label="Propuestas activas" value={content.courses.filter((course) => course.active).length} />
         <Stat label="Aulas por asignar" value={paidPendingClassroom.length} />
       </div>
       <p className="mt-8 max-w-2xl text-gray-400">

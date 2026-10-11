@@ -82,7 +82,7 @@ export const partnersQuery = `*[_type == "networkPartner"] | order(name asc){
   "logoUrl": coalesce(logo.asset->url, logoUrl)
 }`;
 
-export const coursesQuery = `*[_type == "course" && active == true && defined(price)] | order(_createdAt desc){
+export const coursesQuery = `*[_type == "course" && defined(price)] | order(_createdAt desc){
   _id,
   title,
   "slug": slug.current,
@@ -130,7 +130,7 @@ export const courseByIdQuery = `*[_type == "course" && _id == $id][0]{
   quota
 }`;
 
-export const courseCategoriesQuery = `array::unique(*[_type == "course" && active == true && defined(category) && category != ""].category) | order(@ asc)`;
+export const courseCategoriesQuery = `array::unique(*[_type == "course" && defined(price) && defined(category) && category != ""].category) | order(@ asc)`;
 
 export const enrollmentsQuery = `*[_type == "enrollment"] | order(_createdAt desc){
   _id,

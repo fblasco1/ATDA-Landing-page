@@ -32,6 +32,11 @@ const emptyLanding = (): LandingContent => ({
   courses: [],
 });
 
+/** Los cursos inactivos se muestran como historial, siempre después de los activos. */
+function activeFirst(courses: Course[]) {
+  return [...courses.filter((course) => course.active), ...courses.filter((course) => !course.active)];
+}
+
 async function loadLandingContent(): Promise<LandingContent> {
   const client = getReadClient();
   if (!client) return emptyLanding();
@@ -60,7 +65,7 @@ async function loadLandingContent(): Promise<LandingContent> {
       },
       projects: projects ?? [],
       partners: partners ?? [],
-      courses: courses ?? [],
+      courses: activeFirst(courses ?? []),
     };
   } catch (error) {
     console.error("Error al leer Sanity", error);

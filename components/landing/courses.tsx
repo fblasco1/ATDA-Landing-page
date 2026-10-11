@@ -30,32 +30,53 @@ export function Courses({
         ) : null}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
-            <article
-              key={course._id}
-              className={`flex flex-col rounded-xl ${sectionCardClass(band)} p-6 shadow-lg`}
-            >
-              {course.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={course.imageUrl} alt={course.title} className="mb-4 h-44 w-full rounded-lg object-cover" />
-              ) : null}
-              {course.category ? (
-                <span className="mb-2 inline-block w-fit rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold text-teal-300">
-                  {course.category}
-                </span>
-              ) : null}
-              <h3 className="text-xl font-bold text-white">{course.title}</h3>
-              <p className="mt-2 flex-1 text-gray-400">{course.description}</p>
-              <p className="mt-4 text-2xl font-extrabold text-teal-300">{formatARS(course.price)}</p>
-              <Link
-                href={`/propuestas/${course.slug}`}
-                className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-2 text-center font-semibold text-white hover:bg-blue-700"
-              >
-                {isModoCheckoutEnabled() ? "Inscribirme" : "Ver curso"}
-              </Link>
-            </article>
+            <CourseCard key={course._id} course={course} band={band} />
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function CourseCard({ course, band }: { course: Course; band: SectionBand }) {
+  const finished = !course.active;
+
+  return (
+    <article
+      aria-disabled={finished || undefined}
+      className={`flex flex-col rounded-xl ${sectionCardClass(band)} p-6 shadow-lg ${
+        finished ? "select-none opacity-60 grayscale" : ""
+      }`}
+    >
+      {course.imageUrl ? (
+        <div className="mb-4 flex h-44 items-center justify-center overflow-hidden rounded-lg bg-gray-950/40 p-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={course.imageUrl} alt={course.title} className="max-h-full max-w-full object-contain" />
+        </div>
+      ) : null}
+      <div className="mb-2 flex flex-wrap gap-2">
+        {course.category ? (
+          <span className="inline-block w-fit rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold text-teal-300">
+            {course.category}
+          </span>
+        ) : null}
+        {finished ? (
+          <span className="inline-block w-fit rounded-full bg-gray-500/30 px-3 py-1 text-xs font-semibold text-gray-300">
+            Finalizado
+          </span>
+        ) : null}
+      </div>
+      <h3 className="text-xl font-bold text-white">{course.title}</h3>
+      <p className="mt-2 flex-1 text-gray-400">{course.description}</p>
+      <p className="mt-4 text-2xl font-extrabold text-teal-300">{formatARS(course.price)}</p>
+      {finished ? null : (
+        <Link
+          href={`/propuestas/${course.slug}`}
+          className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-2 text-center font-semibold text-white hover:bg-blue-700"
+        >
+          {isModoCheckoutEnabled() ? "Inscribirme" : "Ver curso"}
+        </Link>
+      )}
+    </article>
   );
 }
