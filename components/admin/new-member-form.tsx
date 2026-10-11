@@ -88,7 +88,7 @@ export function NewMemberForm({
         </label>
       </div>
       <p className="text-xs text-gray-500">
-        El socio puede activar su acceso al portal en /socio/activar con este email y DNI.
+        Le enviamos un mail con el link para activar su acceso al portal (pide este email y DNI).
       </p>
       {error ? <p className="text-sm text-red-400">{error}</p> : null}
       <div className="flex gap-3">
