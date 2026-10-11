@@ -33,6 +33,18 @@ export function MemberDetailPanel({
   const [busy, setBusy] = useState(false);
   const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7));
   const [amountPesos, setAmountPesos] = useState("0");
+  const [sendingEmail, setSendingEmail] = useState(false);
+
+  const resendActivationEmail = async () => {
+    setSendingEmail(true);
+    setMessage("");
+    const response = await fetch(`/api/admin/members/${member.id}/activation-email`, { method: "POST" }).catch(
+      () => null,
+    );
+    const data = (await response?.json().catch(() => ({}))) as { error?: string } | undefined;
+    setSendingEmail(false);
+    setMessage(response?.ok ? `Mail de activación enviado a ${member.email}` : (data?.error ?? "No se pudo enviar el mail"));
+  };
 
   const patch = async (body: Record<string, unknown>) => {
     setBusy(true);
@@ -76,6 +88,9 @@ export function MemberDetailPanel({
         <p className="text-gray-400">
           {member.email} · DNI {member.dni} · {STATUS_LABEL[member.status]}
         </p>
+        <p className="text-sm text-gray-500">
+          {[member.profession, member.phone, member.organization, member.roleTitle].filter(Boolean).join(" · ")}
+        </p>
         {message ? <p className="mt-2 text-sm text-teal-300">{message}</p> : null}
       </div>
 
@@ -98,9 +113,19 @@ export function MemberDetailPanel({
             </button>
           ))}
         </div>
-        <p className="mt-3 text-xs text-gray-500">
-          Portal: {member.passwordHash ? "acceso activado" : "pendiente de activar (/socio/activar)"}
-        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+          <span>Portal: {member.passwordHash ? "acceso activado" : "pendiente de activar (/socio/activar)"}</span>
+          {!member.passwordHash && member.status === "active" ? (
+            <button
+              type="button"
+              disabled={sendingEmail}
+              onClick={resendActivationEmail}
+              className="rounded-md border border-teal-700 px-3 py-1.5 text-sm text-teal-200 hover:bg-teal-900/40 disabled:opacity-60"
+            >
+              {sendingEmail ? "Enviando..." : "Reenviar mail de activación"}
+            </button>
+          ) : null}
+        </div>
       </section>
 
       <section className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">

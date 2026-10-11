@@ -11,11 +11,12 @@ function baseConfig(): ClientConfig {
   };
 }
 
-export function getReadClient() {
+/** `useCdn: false` para lecturas que ya cachea Next: el CDN de Sanity tarda unos segundos en reflejar cambios. */
+export function getReadClient({ useCdn = true }: { useCdn?: boolean } = {}) {
   if (!isSanityConfigured()) return null;
   return createClient({
     ...baseConfig(),
-    useCdn: true,
+    useCdn,
     token: process.env.SANITY_API_READ_TOKEN,
   });
 }

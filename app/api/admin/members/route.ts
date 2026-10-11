@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/admin/session";
 import {
+  createMember,
   createMembershipFee,
   getMemberById,
   isDatabaseConfigured,
@@ -10,6 +11,7 @@ import {
   updateMembershipFee,
 } from "@/lib/db/members";
 import type { Member, MembershipFee } from "@/lib/db/schema";
+import { sendMemberActivationEmail } from "@/lib/email/members";
 
 export async function GET(request: Request) {
   const { error } = await requireAdminApi();
@@ -34,6 +36,53 @@ export async function GET(request: Request) {
       { error: err instanceof Error ? err.message : "Error", items: [] },
       { status: 500 },
     );
+  }
+}
+
+export async function POST(request: Request) {
+  const { error } = await requireAdminApi();
+  if (error) return error;
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json({ error: "DATABASE_URL no configurada" }, { status: 503 });
+  }
+
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+    const text = (key: string) => String(body[key] ?? "").trim();
+    const fullName = text("fullName");
+    const email = text("email").toLowerCase();
+    const dni = text("dni");
+    const status = text("status") as Member["status"];
+
+    if (!fullName || !email || !dni) {
+      return NextResponse.json({ error: "Nombre, email y DNI son obligatorios." }, { status: 400 });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Email inválido." }, { status: 400 });
+    }
+
+    const { passwordHash: _hash, ...member } = await createMember({
+      fullName,
+      email,
+      dni,
+      phone: text("phone"),
+      profession: text("profession"),
+      organization: text("organization"),
+      roleTitle: text("roleTitle"),
+      status: ["active", "suspended", "inactive"].includes(status) ? status : "active",
+      notes: text("notes"),
+    });
+    const activation =
+      member.status === "active"
+        ? await sendMemberActivationEmail(member, { request, idempotencyKey: `activation-member-${member.id}-${member.email}` })
+        : null;
+    return NextResponse.json({
+      member,
+      emailSent: activation?.ok ?? false,
+      emailError: activation && !activation.ok ? activation.error : undefined,
+    });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Error" }, { status: 400 });
   }
 }
 

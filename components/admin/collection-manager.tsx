@@ -10,6 +10,8 @@ export type Field = {
   type?: "text" | "textarea" | "number" | "checkbox" | "select" | "creatable-select" | "icon";
   options?: Array<{ value: string; label: string }>;
   rows?: number;
+  /** Solo se muestra si el select `field` tiene alguno de estos valores. */
+  showWhen?: { field: string; in: string[] };
 };
 
 type Item = Record<string, unknown> & { _id: string };
@@ -33,16 +35,19 @@ export function CollectionManager({
   fields,
   items,
   titleField = "title",
+  createdMessage = "Creado. Ya se ve en la landing.",
 }: {
   type: string;
   fields: Field[];
   items: Item[];
   titleField?: string;
+  createdMessage?: string;
 }) {
   const [rows, setRows] = useState(() => normalizeItems(items));
   const [status, setStatus] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const [busy, setBusy] = useState<string | null>(null);
 
   const editing = useMemo(() => rows.find((row) => row._id === editingId), [rows, editingId]);
 
@@ -101,54 +106,74 @@ export function CollectionManager({
     event.preventDefault();
     const form = event.currentTarget;
     const payload = readForm(new FormData(form));
+    setBusy("create");
+    setStatus("");
     const response = await fetch("/api/admin/content", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, data: payload }),
-    });
-    const result = (await response.json().catch(() => ({}))) as { error?: string };
-    if (response.ok) {
+    }).catch(() => null);
+    const result = (await response?.json().catch(() => ({}))) as { error?: string } | undefined;
+    setBusy(null);
+    if (response?.ok) {
       setFormKey((key) => key + 1);
-      setStatus("Creado. La sección se verá en la landing.");
-      await refresh();
+      setStatus(createdMessage);
+      void refresh();
     } else {
-      setStatus(result.error ?? "No se pudo crear");
+      setStatus(result?.error ?? "No se pudo crear");
     }
   };
 
   const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editingId) return;
+    const id = editingId;
     const payload = readForm(new FormData(event.currentTarget));
-    const response = await fetch(`/api/admin/content/${editingId}`, {
+    setBusy("update");
+    setStatus("");
+    const response = await fetch(`/api/admin/content/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    });
-    const result = (await response.json().catch(() => ({}))) as { error?: string };
-    if (response.ok) {
+    }).catch(() => null);
+    const result = (await response?.json().catch(() => ({}))) as { error?: string } | undefined;
+    setBusy(null);
+    if (response?.ok) {
+      const { slug: _slug, ...fieldValues } = payload;
+      setRows((current) => current.map((row) => (row._id === id ? { ...row, ...fieldValues } : row)));
       setEditingId(null);
       setStatus("Actualizado");
-      await refresh();
+      void refresh();
     } else {
-      setStatus(result.error ?? "No se pudo actualizar");
+      setStatus(result?.error ?? "No se pudo actualizar");
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Eliminar este contenido?")) return;
-    const response = await fetch(`/api/admin/content/${id}`, { method: "DELETE" });
-    setStatus(response.ok ? "Eliminado" : "No se pudo eliminar");
-    if (response.ok) await refresh();
+    setBusy(`delete:${id}`);
+    const response = await fetch(`/api/admin/content/${id}`, { method: "DELETE" }).catch(() => null);
+    setBusy(null);
+    setStatus(response?.ok ? "Eliminado" : "No se pudo eliminar");
+    if (response?.ok) setRows((current) => current.filter((row) => row._id !== id));
   };
 
   return (
     <div className="space-y-8">
-      <form key={formKey} onSubmit={handleCreate} className="space-y-3 rounded-lg border border-gray-800 p-4">
+      <form
+        key={formKey}
+        onSubmit={handleCreate}
+        onChange={() => setStatus("")}
+        className="space-y-3 rounded-lg border border-gray-800 p-4"
+      >
         <h3 className="font-semibold text-white">Nuevo</h3>
         <FieldGrid fields={fields} categorySuggestions={categorySuggestions} />
-        <button type="submit" className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-          Crear
+        <button
+          type="submit"
+          disabled={busy !== null}
+          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
+        >
+          {busy === "create" ? "Creando..." : "Crear"}
         </button>
       </form>
       {status ? <p className="text-teal-300">{status}</p> : null}
@@ -170,16 +195,25 @@ export function CollectionManager({
                 >
                   Editar
                 </button>
-                <button type="button" className="text-sm text-red-400" onClick={() => handleDelete(row._id)}>
-                  Borrar
+                <button
+                  type="button"
+                  disabled={busy !== null}
+                  className="text-sm text-red-400 disabled:opacity-60"
+                  onClick={() => handleDelete(row._id)}
+                >
+                  {busy === `delete:${row._id}` ? "Borrando..." : "Borrar"}
                 </button>
               </div>
             </div>
             {editingId === row._id && editing ? (
-              <form onSubmit={handleUpdate} className="mt-4 space-y-3">
+              <form onSubmit={handleUpdate} onChange={() => setStatus("")} className="mt-4 space-y-3">
                 <FieldGrid fields={fields} values={editing} categorySuggestions={categorySuggestions} />
-                <button type="submit" className="rounded-md bg-teal-600 px-4 py-2 text-white">
-                  Guardar cambios
+                <button
+                  type="submit"
+                  disabled={busy !== null}
+                  className="rounded-md bg-teal-600 px-4 py-2 text-white disabled:opacity-60"
+                >
+                  {busy === "update" ? "Guardando..." : "Guardar cambios"}
                 </button>
               </form>
             ) : null}
@@ -199,9 +233,23 @@ function FieldGrid({
   values?: Item;
   categorySuggestions?: string[];
 }) {
+  const [selected, setSelected] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      fields
+        .filter((field) => field.type === "select")
+        .map((field) => {
+          const value = values?.[field.name];
+          return [field.name, typeof value === "string" ? value : (field.options?.[0]?.value ?? "")];
+        }),
+    ),
+  );
+
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {fields.map((field) => {
+        if (field.showWhen && !field.showWhen.in.includes(selected[field.showWhen.field] ?? "")) {
+          return null;
+        }
         const value = values?.[field.name];
         if (field.type === "textarea") {
           return (
@@ -254,7 +302,10 @@ function FieldGrid({
               <span className="mb-1 block text-sm text-gray-400">{field.label}</span>
               <select
                 name={field.name}
-                defaultValue={typeof value === "string" ? value : field.options?.[0]?.value}
+                value={selected[field.name]}
+                onChange={(event) =>
+                  setSelected((current) => ({ ...current, [field.name]: event.target.value }))
+                }
                 className="w-full rounded-md border border-gray-700 bg-gray-900 p-2 text-white"
               >
                 {field.options?.map((option) => (

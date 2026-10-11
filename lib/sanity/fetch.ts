@@ -1,6 +1,6 @@
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { getReadClient } from "./client";
-import { defaultLandingSettings } from "./defaults";
+import { defaultLandingSettings, mergeLandingSettings } from "./defaults";
 import { isSanityConfigured } from "./env";
 import {
   courseByIdQuery,
@@ -9,7 +9,6 @@ import {
   coursesQuery,
   enrollmentByIdQuery,
   enrollmentsQuery,
-  focusAreasQuery,
   landingSettingsQuery,
   partnersQuery,
   projectBySlugQuery,
@@ -20,7 +19,6 @@ import {
 import type {
   Course,
   Enrollment,
-  FocusArea,
   LandingContent,
   LandingSettings,
   NetworkPartner,
@@ -29,43 +27,33 @@ import type {
 
 const emptyLanding = (): LandingContent => ({
   settings: defaultLandingSettings,
-  focusAreas: [],
   projects: [],
   partners: [],
   courses: [],
 });
 
+/** Los cursos inactivos se muestran como historial, siempre después de los activos. */
+function activeFirst(courses: Course[]) {
+  return [...courses.filter((course) => course.active), ...courses.filter((course) => !course.active)];
+}
+
 async function loadLandingContent(): Promise<LandingContent> {
-  const client = getReadClient();
+  const client = getReadClient({ useCdn: false });
   if (!client) return emptyLanding();
 
   try {
-    const [settings, focusAreas, projects, partners, courses] = await Promise.all([
+    const [settings, projects, partners, courses] = await Promise.all([
       client.fetch<LandingSettings | null>(landingSettingsQuery),
-      client.fetch<FocusArea[]>(focusAreasQuery),
       client.fetch<Project[]>(projectsQuery),
       client.fetch<NetworkPartner[]>(partnersQuery),
       client.fetch<Course[]>(coursesQuery),
     ]);
 
     return {
-      settings: {
-        ...defaultLandingSettings,
-        ...(settings ?? {}),
-        aboutValues: settings?.aboutValues?.length
-          ? settings.aboutValues
-          : defaultLandingSettings.aboutValues,
-        joinBenefits: settings?.joinBenefits?.length
-          ? settings.joinBenefits
-          : defaultLandingSettings.joinBenefits,
-        joinEligibility: settings?.joinEligibility?.length
-          ? settings.joinEligibility
-          : defaultLandingSettings.joinEligibility,
-      },
-      focusAreas: focusAreas ?? [],
+      settings: mergeLandingSettings(settings),
       projects: projects ?? [],
       partners: partners ?? [],
-      courses: courses ?? [],
+      courses: activeFirst(courses ?? []),
     };
   } catch (error) {
     console.error("Error al leer Sanity", error);
@@ -77,6 +65,11 @@ export const getLandingContent = unstable_cache(loadLandingContent, ["landing-co
   tags: ["landing"],
   revalidate: 60,
 });
+
+/** Tras guardar desde el panel, la próxima visita al sitio tiene que ver el cambio, no la versión anterior. */
+export function expireLandingCache() {
+  revalidateTag("landing", { expire: 0 });
+}
 
 export async function getCourseBySlug(slug: string) {
   const client = getReadClient();

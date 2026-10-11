@@ -1,14 +1,13 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export function ChangePasswordForm({ forced }: { forced: boolean }) {
-  const router = useRouter();
   const { update } = useSession();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,9 +26,14 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
         setBusy(false);
         return;
       }
-      await update();
-      router.replace("/admin");
-      router.refresh();
+      setSaved(true);
+      // Sin argumentos `update()` solo relee la sesión y el token sigue pidiendo cambiar la contraseña.
+      const session = await update({ passwordChanged: true });
+      if (session && !session.user?.mustChangePassword) {
+        window.location.assign("/admin");
+      } else {
+        await signOut({ callbackUrl: "/admin/login" });
+      }
     } catch {
       setError("Error de red. Intentá de nuevo.");
       setBusy(false);
@@ -75,12 +79,17 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
           {error}
         </p>
       ) : null}
+      {saved ? (
+        <p className="text-sm text-teal-300" role="status">
+          Contraseña actualizada. Te llevamos al panel…
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={busy}
         className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
       >
-        {busy ? "Guardando…" : "Guardar contraseña"}
+        {saved ? "Contraseña guardada" : busy ? "Guardando…" : "Guardar contraseña"}
       </button>
       {forced ? (
         <button

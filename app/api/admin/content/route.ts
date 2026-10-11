@@ -1,8 +1,8 @@
 import { requireAdminApi } from "@/lib/admin/session";
 import { createDocument, listDocuments } from "@/lib/sanity/write";
-import { revalidateTag } from "next/cache";
+import { expireLandingCache } from "@/lib/sanity/fetch";
 
-const allowed = new Set(["focusArea", "project", "networkPartner", "course"]);
+const allowed = new Set(["project", "networkPartner", "course"]);
 
 export async function GET(request: Request) {
   const { error } = await requireAdminApi();
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Datos inválidos" }, { status: 400 });
     }
     const item = await createDocument(body.type, body.data);
-    revalidateTag("landing", "max");
+    expireLandingCache();
     return Response.json({ item });
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : "Error" }, { status: 500 });

@@ -44,6 +44,8 @@ export function MembershipRequestsPanel({
     const data = (await response.json()) as {
       error?: string;
       request?: MembershipRequest;
+      emailSent?: boolean;
+      emailError?: string;
     };
     setBusyId(null);
     if (!response.ok) {
@@ -54,16 +56,20 @@ export function MembershipRequestsPanel({
       setItems((current) => current.map((row) => (row.id === id ? data.request! : row)));
     }
     setMessage(
-      status === "approved"
-        ? "Solicitud aprobada y socio creado (si no existía)."
-        : `Estado actualizado: ${STATUS_LABEL[status]}`,
+      status !== "approved"
+        ? `Estado actualizado: ${STATUS_LABEL[status]}`
+        : data.emailSent
+          ? "Solicitud aprobada. Le enviamos el mail para activar su acceso."
+          : data.emailError
+            ? `Solicitud aprobada, pero no se pudo enviar el mail (${data.emailError}). Podés reenviarlo desde la ficha del socio.`
+            : "Solicitud aprobada. El socio ya tenía el acceso activado.",
     );
   };
 
   if (!dbReady) {
     return (
       <div className="rounded-lg border border-amber-700/50 bg-amber-950/30 p-4 text-amber-100">
-        Configurá `DATABASE_URL` (Neon) para gestionar solicitudes de afiliación.
+        Configurá `DATABASE_URL` (Neon) para gestionar solicitudes de asociación.
       </div>
     );
   }
@@ -118,6 +124,7 @@ export function MembershipRequestsPanel({
                     <div className="text-xs text-gray-500">
                       DNI {row.dni} · {row.phone}
                     </div>
+                    {row.profession ? <div className="text-xs text-gray-400">{row.profession}</div> : null}
                     {row.organization ? (
                       <div className="text-xs text-gray-500">
                         {row.organization}
@@ -126,7 +133,7 @@ export function MembershipRequestsPanel({
                     ) : null}
                   </td>
                   <td className="max-w-xs p-3 text-gray-400">
-                    <p className="line-clamp-4">{row.motivation}</p>
+                    <p className="line-clamp-4">{row.motivation || "—"}</p>
                     {row.adminNotes ? (
                       <p className="mt-2 text-xs text-amber-200/80">Notas: {row.adminNotes}</p>
                     ) : null}

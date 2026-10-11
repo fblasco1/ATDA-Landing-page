@@ -94,8 +94,8 @@ export function Contact({
           <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{settings.contactSubtitle}</p>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-500">
             ¿Querés asociarte?{" "}
-            <Link href="/afiliacion" className="font-medium text-teal-300 hover:text-teal-200">
-              Completá la solicitud de afiliación
+            <Link href="/asociacion" className="font-medium text-teal-300 hover:text-teal-200">
+              Completá la solicitud de asociación
             </Link>
             .
           </p>
@@ -160,7 +160,7 @@ export function Contact({
                   </option>
                   <option value="Consulta">Consulta</option>
                   <option value="Propuesta">Propuesta</option>
-                  <option value="Cursos">Cursos</option>
+                  <option value="Cursos y actividades">Cursos y actividades</option>
                   <option value="Otro">Otro</option>
                 </select>
               </Field>

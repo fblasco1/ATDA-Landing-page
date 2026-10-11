@@ -13,7 +13,7 @@ function CalendarIcon({ className }: { className?: string }) {
 }
 
 export function ActivityCard({ project }: { project: Project }) {
-  const href = project.slug ? `/actividad/${project.slug}` : undefined;
+  const href = project.slug ? `/novedades/${project.slug}` : undefined;
   const dateLabel = formatDateShortES(project.publishedAt);
 
   const card = (

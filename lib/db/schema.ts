@@ -1,6 +1,8 @@
 import {
   boolean,
+  index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   serial,
@@ -32,9 +34,11 @@ export const membershipRequests = pgTable("membership_requests", {
   email: varchar("email", { length: 255 }).notNull(),
   dni: varchar("dni", { length: 32 }).notNull(),
   phone: varchar("phone", { length: 64 }).notNull(),
+  /** Obligatoria en el formulario; nula solo en solicitudes previas al campo. */
+  profession: varchar("profession", { length: 200 }),
   organization: varchar("organization", { length: 255 }),
   roleTitle: varchar("role_title", { length: 255 }),
-  motivation: text("motivation").notNull(),
+  motivation: text("motivation"),
   status: membershipRequestStatusEnum("status").notNull().default("received"),
   adminNotes: text("admin_notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -49,6 +53,7 @@ export const members = pgTable(
     fullName: varchar("full_name", { length: 200 }).notNull(),
     dni: varchar("dni", { length: 32 }).notNull(),
     phone: varchar("phone", { length: 64 }),
+    profession: varchar("profession", { length: 200 }),
     organization: varchar("organization", { length: 255 }),
     roleTitle: varchar("role_title", { length: 255 }),
     status: memberStatusEnum("status").notNull().default("active"),
@@ -119,7 +124,36 @@ export const adminUsers = pgTable(
   (table) => [uniqueIndex("admin_users_email_uidx").on(table.email)],
 );
 
+/** Copia de un documento de Sanity tomada antes de editarlo, borrarlo o restaurarlo desde el panel. */
+export const contentRevisions = pgTable(
+  "content_revisions",
+  {
+    id: serial("id").primaryKey(),
+    documentId: varchar("document_id", { length: 128 }).notNull(),
+    documentType: varchar("document_type", { length: 64 }).notNull(),
+    title: varchar("title", { length: 255 }),
+    /** Qué se hizo después de tomar la copia: update | delete | restore */
+    action: varchar("action", { length: 16 }).notNull(),
+    snapshot: jsonb("snapshot").notNull(),
+    /** Resumen legible de lo que cambió: [{ label, detail }] */
+    changes: jsonb("changes").$type<{ label: string; detail?: string }[]>(),
+    createdBy: varchar("created_by", { length: 255 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("content_revisions_document_idx").on(table.documentId, table.createdAt)],
+);
+
+/** Contenido sin guardar que un admin está previsualizando en el sitio. */
+export const contentPreviews = pgTable("content_previews", {
+  id: serial("id").primaryKey(),
+  token: varchar("token", { length: 64 }).notNull().unique(),
+  data: jsonb("data").notNull(),
+  createdBy: varchar("created_by", { length: 255 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type AdminUser = typeof adminUsers.$inferSelect;
+export type ContentRevision = typeof contentRevisions.$inferSelect;
 export type MembershipRequest = typeof membershipRequests.$inferSelect;
 export type Member = typeof members.$inferSelect;
 export type MembershipFee = typeof membershipFees.$inferSelect;

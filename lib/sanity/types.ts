@@ -1,6 +1,6 @@
 export type FocusIcon = string;
 export type ValueIcon = string;
-export type PaymentProvider = "modo";
+export type PaymentProvider = "modo" | "free" | "manual";
 export type PaymentStatus = "pending" | "paid" | "failed" | "expired" | "underpaid" | "overpaid";
 export type ClassroomAccess = "pending" | "granted";
 
@@ -21,6 +21,22 @@ export type LandingSettings = {
   heroTitle: string;
   heroSubtitle: string;
   heroImageUrl?: string;
+  /** Imágenes del carrusel del Hero, en orden. Si está vacío se usa `heroImageUrl`. */
+  heroImageUrls: string[];
+  navAboutLabel: string;
+  navNewsLabel: string;
+  navNetworkLabel: string;
+  navCoursesLabel: string;
+  navContactLabel: string;
+  navJoinLabel: string;
+  newsTitle: string;
+  newsSubtitle: string;
+  networkTitle: string;
+  networkSubtitle: string;
+  coursesTitle: string;
+  coursesSubtitle: string;
+  membershipTitle: string;
+  membershipSubtitle: string;
   aboutTitle: string;
   aboutBody: string;
   aboutValues: AboutValue[];
@@ -41,13 +57,6 @@ export type LandingSettings = {
   statuteUrl?: string;
 };
 
-export type FocusArea = {
-  _id: string;
-  title: string;
-  description: string;
-  icon: FocusIcon;
-};
-
 export type Project = {
   _id: string;
   title: string;
@@ -65,7 +74,10 @@ export type NetworkPartner = {
   name: string;
   url?: string;
   logoUrl?: string;
+  logoBackground?: "white" | "dark" | "none";
 };
+
+export type CoursePriceMode = "general" | "members" | "free";
 
 export type Course = {
   _id: string;
@@ -73,7 +85,11 @@ export type Course = {
   slug: string;
   description: string;
   category?: string;
-  price: number;
+  priceMode?: CoursePriceMode;
+  /** Precio general (modalidad "general"). */
+  price?: number | null;
+  memberPrice?: number | null;
+  nonMemberPrice?: number | null;
   active: boolean;
   imageUrl?: string;
   quota?: number | null;
@@ -84,6 +100,7 @@ export type EnrollmentBuyer = {
   email: string;
   dni: string;
   phone: string;
+  isMember?: boolean;
 };
 
 export type Enrollment = {
@@ -105,7 +122,6 @@ export type Enrollment = {
 
 export type LandingContent = {
   settings: LandingSettings;
-  focusAreas: FocusArea[];
   projects: Project[];
   partners: NetworkPartner[];
   courses: Course[];

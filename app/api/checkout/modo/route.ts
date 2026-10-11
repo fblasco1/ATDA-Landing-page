@@ -1,3 +1,5 @@
+import { isActiveMember } from "@/lib/courses/member-check";
+import { coursePriceFor, isFreeCourse } from "@/lib/courses/pricing";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
 import { createModoPaymentRequest } from "@/lib/payments/modo";
 import { getCourseById } from "@/lib/sanity/fetch";
@@ -23,18 +25,27 @@ export async function POST(request: Request) {
     if (!course || !course.active) {
       return Response.json({ error: "El curso no está disponible" }, { status: 404 });
     }
+    if (isFreeCourse(course)) {
+      return Response.json({ error: "Esta actividad no es arancelada" }, { status: 400 });
+    }
+
+    const isMember = await isActiveMember(body.email, body.dni);
+    const amount = coursePriceFor(course, isMember);
+    if (amount <= 0) {
+      return Response.json({ error: "El curso no tiene precio configurado" }, { status: 409 });
+    }
 
     const enrollment = await createEnrollment({
       course: { _type: "reference", _ref: course._id },
-      buyer: { name: body.name, email: body.email, dni: body.dni, phone: body.phone },
-      amount: course.price,
+      buyer: { name: body.name, email: body.email, dni: body.dni, phone: body.phone, isMember },
+      amount,
       provider: "modo",
       status: "pending",
     });
 
     const payment = await createModoPaymentRequest({
       enrollmentId: enrollment._id,
-      amount: course.price,
+      amount,
       description: `Curso ATDA: ${course.title}`,
       customer: {
         full_name: body.name,

@@ -35,7 +35,7 @@ export function CoursesArchive({
       ) : null}
 
       {filtered.length === 0 ? (
-        <p className="px-6 py-20 text-center text-gray-400">No hay cursos en esta categoría.</p>
+        <p className="px-6 py-20 text-center text-gray-400">No hay propuestas en esta categoría.</p>
       ) : (
         <Courses courses={filtered} band="base" showHeading={false} />
       )}

@@ -1,9 +1,13 @@
+import { CopyEmail } from "@/components/member/copy-email";
 import { MemberNav } from "@/components/member/member-nav";
+import { MemberProfileForm } from "@/components/member/member-profile-form";
 import { MemberSessionProvider } from "@/components/member/session-provider";
 import { getMemberById, listFeesForMember } from "@/lib/db/members";
 import { getMemberSession } from "@/lib/member/session";
 import { formatARS, formatDateShortES } from "@/lib/utils";
 import { redirect } from "next/navigation";
+
+const CONTACT_EMAIL = "contacto.atda@gmail.com";
 
 const FEE_LABEL: Record<string, string> = {
   pending: "Pendiente",
@@ -35,7 +39,7 @@ export default async function SocioDashboardPage() {
         <MemberNav />
 
         <h1 className="mb-2 text-3xl font-bold text-white">Hola, {member.fullName.split(" ")[0]}</h1>
-        <p className="mb-8 text-gray-400">Datos personales y estado de tu cuota de afiliación.</p>
+        <p className="mb-8 text-gray-400">Datos personales y estado de tu cuota de socio.</p>
 
         <section className="mb-8 rounded-xl border border-gray-800 bg-gray-900/60 p-6">
           <h2 className="mb-4 text-lg font-semibold text-white">Datos personales</h2>
@@ -43,10 +47,16 @@ export default async function SocioDashboardPage() {
             <Item label="Nombre" value={member.fullName} />
             <Item label="Email" value={member.email} />
             <Item label="DNI" value={member.dni} />
-            <Item label="Teléfono" value={member.phone || "—"} />
-            <Item label="Organización" value={member.organization || "—"} />
             <Item label="Estado" value={STATUS_LABEL[member.status] ?? member.status} />
           </dl>
+          <MemberProfileForm
+            initial={{
+              phone: member.phone,
+              profession: member.profession,
+              organization: member.organization,
+              roleTitle: member.roleTitle,
+            }}
+          />
         </section>
 
         <section className="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
@@ -93,6 +103,14 @@ export default async function SocioDashboardPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        <section className="mt-8 rounded-xl border border-gray-800 bg-gray-900/60 p-6">
+          <h2 className="mb-2 text-lg font-semibold text-white">¿Necesitás ayuda?</h2>
+          <p className="mb-4 text-sm text-gray-400">
+            Si tenés algún problema o un dato que no podés cambiar desde acá, escribinos a:
+          </p>
+          <CopyEmail email={CONTACT_EMAIL} />
         </section>
       </div>
     </div>

@@ -1,20 +1,20 @@
 import { AffiliationForm } from "@/components/membership/affiliation-form";
 import { Footer } from "@/components/landing/footer";
-import { getLandingContent } from "@/lib/sanity/fetch";
+import { getSiteContent } from "@/lib/sanity/site-content";
 import { isDatabaseConfigured } from "@/lib/db";
 
 export default async function AffiliationPage() {
-  const landing = await getLandingContent();
+  const landing = await getSiteContent();
   const dbReady = isDatabaseConfigured();
 
   return (
     <div className="min-h-screen bg-gray-950">
       <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-teal-600 px-6 py-16 text-center text-white">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-100">Sumate</p>
-        <h1 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">Solicitud de afiliación</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/90">
-          Completá el formulario para pedir ser socio de ATDA. Revisamos cada solicitud y te contactamos.
-        </p>
+        <h1 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">{landing.settings.membershipTitle}</h1>
+        {landing.settings.membershipSubtitle ? (
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/90">{landing.settings.membershipSubtitle}</p>
+        ) : null}
       </section>
       <main className="px-6 py-12">
         <div className="container mx-auto max-w-3xl">

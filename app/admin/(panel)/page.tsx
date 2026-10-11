@@ -20,14 +20,13 @@ export default async function AdminHomePage() {
           administrar contenido.
         </p>
       ) : null}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Áreas publicadas" value={content.focusAreas.length} />
-        <Stat label="Noticias publicadas" value={content.projects.length} />
-        <Stat label="Cursos activos" value={content.courses.length} />
+      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <Stat label="Novedades publicadas" value={content.projects.length} />
+        <Stat label="Propuestas activas" value={content.courses.filter((course) => course.active).length} />
         <Stat label="Aulas por asignar" value={paidPendingClassroom.length} />
       </div>
       <p className="mt-8 max-w-2xl text-gray-400">
-        Las secciones de la landing (áreas, actividad, red y cursos) solo se ven si hay datos cargados. El alta de
+        Las secciones de la landing (novedades, red y propuestas) solo se ven si hay datos cargados. El alta de
         usuarios del aula virtual se hace a mano; acá solo marcás el acceso como concedido.
       </p>
     </div>

@@ -6,6 +6,23 @@ export const defaultLandingSettings: LandingSettings = {
   heroTitle: "Conectar saberes. Impulsar desarrollo. Construir soberanía.",
   heroSubtitle:
     "Promovemos debates estratégicos con la convicción de que la transformación productiva y tecnológica es esencial para alcanzar el desarrollo inclusivo y sostenible de la Argentina.",
+  heroImageUrls: [],
+  navAboutLabel: "Sobre Nosotros",
+  navNewsLabel: "Novedades",
+  navNetworkLabel: "Red",
+  navCoursesLabel: "Propuestas",
+  navContactLabel: "Contacto",
+  navJoinLabel: "Quiero ser parte",
+  newsTitle: "Novedades",
+  newsSubtitle: "Las últimas publicaciones sobre tecnología, industria y desarrollo en Argentina.",
+  networkTitle: "Nuestra Red",
+  networkSubtitle:
+    "Construimos alianzas con un ecosistema de instituciones, empresas y organizaciones que potencian el desarrollo tecnológico nacional.",
+  coursesTitle: "Propuestas",
+  coursesSubtitle: "Formaciones de ATDA.",
+  membershipTitle: "Solicitud de asociación",
+  membershipSubtitle:
+    "Completá el formulario para pedir ser socio de ATDA. Revisamos cada solicitud y te contactamos.",
   aboutTitle: "Quiénes somos",
   aboutBody:
     "ATDA nace del compromiso de integrantes de la Universidad Tecnológica Nacional que, a partir de sus trayectorias en el sector público y privado, decidieron formar un grupo interdisciplinario de profesionales de la ingeniería, la ciencia, la técnica y la tecnología, con el propósito de generar un espacio de participación activa para la promoción del desarrollo industrial y tecnológico de Argentina.",
@@ -71,3 +88,32 @@ export const defaultLandingSettings: LandingSettings = {
   contactEmail: "mailto:mlopezbisio@gmail.com",
   statuteUrl: "https://drive.google.com/file/d/11EHh-8C7vRb_8dNqpscjGbAU0VpYUWs8/view?usp=drive_link",
 };
+
+/** Nombres de secciones y menú: si quedan vacíos se usa el texto por defecto para no dejar huecos. */
+const NON_EMPTY_FIELDS = new Set<keyof LandingSettings>([
+  "navAboutLabel",
+  "navNewsLabel",
+  "navNetworkLabel",
+  "navCoursesLabel",
+  "navContactLabel",
+  "navJoinLabel",
+  "newsTitle",
+  "networkTitle",
+  "coursesTitle",
+  "membershipTitle",
+]);
+
+const NON_EMPTY_LISTS = ["aboutValues", "joinBenefits", "joinEligibility"] as const;
+
+export function mergeLandingSettings(stored: Partial<LandingSettings> | null | undefined): LandingSettings {
+  const merged: Record<string, unknown> = { ...defaultLandingSettings };
+  for (const [key, value] of Object.entries(stored ?? {})) {
+    if (value === null || value === undefined) continue;
+    if (NON_EMPTY_FIELDS.has(key as keyof LandingSettings) && typeof value === "string" && !value.trim()) continue;
+    merged[key] = value;
+  }
+  for (const key of NON_EMPTY_LISTS) {
+    if (!stored?.[key]?.length) merged[key] = defaultLandingSettings[key];
+  }
+  return merged as LandingSettings;
+}

@@ -16,9 +16,10 @@ export async function createMembershipRequest(input: {
   email: string;
   dni: string;
   phone: string;
+  profession: string;
   organization?: string;
   roleTitle?: string;
-  motivation: string;
+  motivation?: string;
 }) {
   const db = getDb();
   const [row] = await db
@@ -28,9 +29,10 @@ export async function createMembershipRequest(input: {
       email: input.email.toLowerCase(),
       dni: input.dni,
       phone: input.phone,
+      profession: input.profession,
       organization: input.organization || null,
       roleTitle: input.roleTitle || null,
-      motivation: input.motivation,
+      motivation: input.motivation || null,
       status: "received",
     })
     .returning();
@@ -95,6 +97,7 @@ export async function approveMembershipRequest(id: number, adminNotes?: string) 
         fullName: request.fullName,
         dni: request.dni,
         phone: request.phone,
+        profession: request.profession,
         organization: request.organization,
         roleTitle: request.roleTitle,
         status: "active",
@@ -117,6 +120,48 @@ export async function approveMembershipRequest(id: number, adminNotes?: string) 
 
   const updated = await updateMembershipRequestStatus(id, "approved", adminNotes);
   return { request: updated, member };
+}
+
+/** Alta manual desde el panel, sin solicitud previa. */
+export async function createMember(input: {
+  fullName: string;
+  email: string;
+  dni: string;
+  phone?: string;
+  profession?: string;
+  organization?: string;
+  roleTitle?: string;
+  status?: Member["status"];
+  notes?: string;
+}) {
+  const db = getDb();
+  const email = input.email.toLowerCase();
+  const [duplicate] = await db
+    .select({ email: members.email, dni: members.dni })
+    .from(members)
+    .where(or(eq(members.email, email), eq(members.dni, input.dni)))
+    .limit(1);
+  if (duplicate) {
+    throw new Error(
+      duplicate.email === email ? "Ya existe un socio con ese email." : "Ya existe un socio con ese DNI.",
+    );
+  }
+
+  const [row] = await db
+    .insert(members)
+    .values({
+      email,
+      fullName: input.fullName,
+      dni: input.dni,
+      phone: input.phone || null,
+      profession: input.profession || null,
+      organization: input.organization || null,
+      roleTitle: input.roleTitle || null,
+      status: input.status ?? "active",
+      notes: input.notes || null,
+    })
+    .returning();
+  return row;
 }
 
 export async function listMembers(filters?: {
@@ -162,6 +207,7 @@ export async function updateMember(
   patch: Partial<{
     fullName: string;
     phone: string | null;
+    profession: string | null;
     organization: string | null;
     roleTitle: string | null;
     status: Member["status"];
