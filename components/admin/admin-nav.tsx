@@ -12,6 +12,7 @@ const links = [
   { href: "/admin/cursos", label: "Propuestas" },
   { href: "/admin/inscripciones", label: "Inscripciones" },
   { href: "/admin/socios", label: "Socios" },
+  { href: "/admin/historial", label: "Historial" },
 ];
 
 export function AdminNav({

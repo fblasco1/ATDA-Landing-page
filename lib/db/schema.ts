@@ -1,6 +1,8 @@
 import {
   boolean,
+  index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   serial,
@@ -122,7 +124,25 @@ export const adminUsers = pgTable(
   (table) => [uniqueIndex("admin_users_email_uidx").on(table.email)],
 );
 
+/** Copia de un documento de Sanity tomada antes de editarlo, borrarlo o restaurarlo desde el panel. */
+export const contentRevisions = pgTable(
+  "content_revisions",
+  {
+    id: serial("id").primaryKey(),
+    documentId: varchar("document_id", { length: 128 }).notNull(),
+    documentType: varchar("document_type", { length: 64 }).notNull(),
+    title: varchar("title", { length: 255 }),
+    /** Qué se hizo después de tomar la copia: update | delete | restore */
+    action: varchar("action", { length: 16 }).notNull(),
+    snapshot: jsonb("snapshot").notNull(),
+    createdBy: varchar("created_by", { length: 255 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("content_revisions_document_idx").on(table.documentId, table.createdAt)],
+);
+
 export type AdminUser = typeof adminUsers.$inferSelect;
+export type ContentRevision = typeof contentRevisions.$inferSelect;
 export type MembershipRequest = typeof membershipRequests.$inferSelect;
 export type Member = typeof members.$inferSelect;
 export type MembershipFee = typeof membershipFees.$inferSelect;

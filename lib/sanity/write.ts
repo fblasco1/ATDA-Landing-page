@@ -20,6 +20,21 @@ export async function upsertLandingSettings(data: Partial<LandingSettings>) {
   });
 }
 
+export async function getRawDocument(id: string) {
+  const client = getWriteClient();
+  return (await client.getDocument(id)) ?? null;
+}
+
+/** Vuelve a dejar un documento como estaba en la copia (lo recrea si había sido borrado). */
+export async function replaceDocument(snapshot: Record<string, unknown>) {
+  const client = getWriteClient();
+  const { _rev, _createdAt, _updatedAt, ...document } = snapshot as SanityDocument;
+  void _rev;
+  void _createdAt;
+  void _updatedAt;
+  return client.createOrReplace(document);
+}
+
 export async function fetchAdminSettings() {
   const client = getWriteClient();
   return client.fetch<LandingSettings | null>(landingSettingsQuery);
