@@ -33,7 +33,7 @@ export const DEFAULT_PRIVACY_POLICY = `## Responsable de los datos
 
 ## Qué datos recolectamos
 - Solicitud de asociación: nombre y apellido, email, DNI, teléfono, profesión y, si los completás, organización, cargo y motivación.
-- Formulario de contacto: nombre, email, teléfono y el mensaje que nos envíes.
+- Formulario de contacto: nombre, email, teléfono (si lo completás) y el mensaje que nos envíes.
 - Espacio de socios: los datos de tu ficha y el estado de tu cuota.
 - Inscripción a propuestas: los datos necesarios para registrar la inscripción y, si corresponde, el pago.
 

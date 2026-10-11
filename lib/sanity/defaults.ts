@@ -75,8 +75,8 @@ export const defaultLandingSettings: LandingSettings = {
     },
   ],
   joinCtaText:
-    "Contactanos para iniciar tu proceso de membresía y empezar a colaborar en la construcción de un futuro industrial soberano.",
-  joinCtaLabel: "Quiero sumar mi potencial",
+    "Completá la solicitud de asociación y empezá a colaborar en la construcción de un futuro industrial soberano.",
+  joinCtaLabel: "Quiero ser parte",
   contactTitle: "Contactanos",
   contactSubtitle: "¿Tenés una idea, un proyecto o querés unirte a nosotros? Nos encantaría saber de vos.",
   formspreeEndpoint: "https://formspree.io/f/xjgwjpaj",

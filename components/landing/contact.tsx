@@ -43,7 +43,8 @@ export function Contact({
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       errors.email = "Email inválido.";
     }
-    if (formData.phone.trim().length < 6) errors.phone = "Ingresá un teléfono válido.";
+    const phone = formData.phone.trim();
+    if (phone && phone.replace(/\D/g, "").length < 6) errors.phone = "Ingresá un teléfono válido o dejalo vacío.";
     if (!formData._subject) errors._subject = "Elegí un tema.";
     if (formData.message.trim().length < 10) {
       errors.message = "El mensaje debe tener al menos 10 caracteres.";
@@ -140,14 +141,13 @@ export function Contact({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Número de contacto" htmlFor="phone" error={fieldErrors.phone}>
+              <Field label="Teléfono (opcional)" htmlFor="phone" error={fieldErrors.phone}>
                 <input
                   id="phone"
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  required
                   autoComplete="tel"
                   disabled={disabled}
                   aria-invalid={Boolean(fieldErrors.phone)}
