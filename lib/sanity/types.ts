@@ -1,6 +1,6 @@
 export type FocusIcon = string;
 export type ValueIcon = string;
-export type PaymentProvider = "modo";
+export type PaymentProvider = "modo" | "free";
 export type PaymentStatus = "pending" | "paid" | "failed" | "expired" | "underpaid" | "overpaid";
 export type ClassroomAccess = "pending" | "granted";
 
@@ -61,13 +61,19 @@ export type NetworkPartner = {
   logoBackground?: "white" | "dark" | "none";
 };
 
+export type CoursePriceMode = "general" | "members" | "free";
+
 export type Course = {
   _id: string;
   title: string;
   slug: string;
   description: string;
   category?: string;
-  price: number;
+  priceMode?: CoursePriceMode;
+  /** Precio general (modalidad "general"). */
+  price?: number | null;
+  memberPrice?: number | null;
+  nonMemberPrice?: number | null;
   active: boolean;
   imageUrl?: string;
   quota?: number | null;
@@ -78,6 +84,7 @@ export type EnrollmentBuyer = {
   email: string;
   dni: string;
   phone: string;
+  isMember?: boolean;
 };
 
 export type Enrollment = {

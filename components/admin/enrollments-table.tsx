@@ -146,9 +146,10 @@ export function EnrollmentsTable({ items }: { items: Enrollment[] }) {
                     <div>{row.buyer?.name}</div>
                     <div className="text-xs text-gray-500">{row.buyer?.email}</div>
                     <div className="text-xs text-gray-500">DNI {row.buyer?.dni}</div>
+                    {row.buyer?.isMember ? <div className="text-xs text-teal-300">Socio/a</div> : null}
                   </td>
-                  <td className="p-3">{formatARS(row.amount)}</td>
-                  <td className="p-3">MODO</td>
+                  <td className="p-3">{row.provider === "free" ? "Sin cargo" : formatARS(row.amount)}</td>
+                  <td className="p-3">{row.provider === "free" ? "—" : "MODO"}</td>
                   <td className="p-3">{row.status}</td>
                   <td className="p-3">
                     {row.classroomAccess === "granted" ? "Asignada" : "Pendiente"}

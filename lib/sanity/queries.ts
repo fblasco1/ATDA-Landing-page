@@ -83,55 +83,33 @@ export const partnersQuery = `*[_type == "networkPartner"] | order(name asc){
   logoBackground
 }`;
 
-export const coursesQuery = `*[_type == "course" && defined(price)] | order(_createdAt desc){
+const courseProjection = `{
   _id,
   title,
   "slug": slug.current,
   description,
   category,
+  priceMode,
   price,
+  memberPrice,
+  nonMemberPrice,
   active,
   "imageUrl": coalesce(image.asset->url, imageUrl),
   quota
 }`;
 
-export const allCoursesQuery = `*[_type == "course"] | order(_createdAt desc){
-  _id,
-  title,
-  "slug": slug.current,
-  description,
-  category,
-  price,
-  active,
-  "imageUrl": coalesce(image.asset->url, imageUrl),
-  quota
-}`;
+/** Un curso se publica si tiene precio cargado según su modalidad. */
+const coursePriced = `(priceMode == "free" || (priceMode == "members" && defined(memberPrice) && defined(nonMemberPrice)) || ((!defined(priceMode) || priceMode == "general") && defined(price)))`;
 
-export const courseBySlugQuery = `*[_type == "course" && slug.current == $slug && active == true][0]{
-  _id,
-  title,
-  "slug": slug.current,
-  description,
-  category,
-  price,
-  active,
-  "imageUrl": coalesce(image.asset->url, imageUrl),
-  quota
-}`;
+export const coursesQuery = `*[_type == "course" && ${coursePriced}] | order(_createdAt desc)${courseProjection}`;
 
-export const courseByIdQuery = `*[_type == "course" && _id == $id][0]{
-  _id,
-  title,
-  "slug": slug.current,
-  description,
-  category,
-  price,
-  active,
-  "imageUrl": coalesce(image.asset->url, imageUrl),
-  quota
-}`;
+export const allCoursesQuery = `*[_type == "course"] | order(_createdAt desc)${courseProjection}`;
 
-export const courseCategoriesQuery = `array::unique(*[_type == "course" && defined(price) && defined(category) && category != ""].category) | order(@ asc)`;
+export const courseBySlugQuery = `*[_type == "course" && slug.current == $slug && active == true][0]${courseProjection}`;
+
+export const courseByIdQuery = `*[_type == "course" && _id == $id][0]${courseProjection}`;
+
+export const courseCategoriesQuery = `array::unique(*[_type == "course" && ${coursePriced} && defined(category) && category != ""].category) | order(@ asc)`;
 
 export const enrollmentsQuery = `*[_type == "enrollment"] | order(_createdAt desc){
   _id,

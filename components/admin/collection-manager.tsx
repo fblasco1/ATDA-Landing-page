@@ -10,6 +10,8 @@ export type Field = {
   type?: "text" | "textarea" | "number" | "checkbox" | "select" | "creatable-select" | "icon";
   options?: Array<{ value: string; label: string }>;
   rows?: number;
+  /** Solo se muestra si el select `field` tiene alguno de estos valores. */
+  showWhen?: { field: string; in: string[] };
 };
 
 type Item = Record<string, unknown> & { _id: string };
@@ -206,9 +208,23 @@ function FieldGrid({
   values?: Item;
   categorySuggestions?: string[];
 }) {
+  const [selected, setSelected] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      fields
+        .filter((field) => field.type === "select")
+        .map((field) => {
+          const value = values?.[field.name];
+          return [field.name, typeof value === "string" ? value : (field.options?.[0]?.value ?? "")];
+        }),
+    ),
+  );
+
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {fields.map((field) => {
+        if (field.showWhen && !field.showWhen.in.includes(selected[field.showWhen.field] ?? "")) {
+          return null;
+        }
         const value = values?.[field.name];
         if (field.type === "textarea") {
           return (
@@ -261,7 +277,10 @@ function FieldGrid({
               <span className="mb-1 block text-sm text-gray-400">{field.label}</span>
               <select
                 name={field.name}
-                defaultValue={typeof value === "string" ? value : field.options?.[0]?.value}
+                value={selected[field.name]}
+                onChange={(event) =>
+                  setSelected((current) => ({ ...current, [field.name]: event.target.value }))
+                }
                 className="w-full rounded-md border border-gray-700 bg-gray-900 p-2 text-white"
               >
                 {field.options?.map((option) => (

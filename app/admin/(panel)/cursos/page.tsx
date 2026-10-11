@@ -1,4 +1,5 @@
 import { CollectionManager } from "@/components/admin/collection-manager";
+import { PRICE_MODE_OPTIONS } from "@/lib/courses/pricing";
 import { listDocumentsSafe } from "@/lib/sanity/write";
 
 export default async function AdminCoursesPage() {
@@ -10,7 +11,7 @@ export default async function AdminCoursesPage() {
       <p className="mb-6 text-gray-400">
         Cursos y actividades. Se muestran en la sección Propuestas de la landing y en /propuestas. Los inactivos quedan
         como historial: aparecen al final, en gris y sin inscripción. Las categorías se crean al vuelo y sirven para
-        filtrar.
+        filtrar. El precio de socios se aplica a quien se inscribe con el email y DNI de un socio activo.
       </p>
       <CollectionManager
         type="course"
@@ -19,7 +20,25 @@ export default async function AdminCoursesPage() {
         fields={[
           { name: "title", label: "Título" },
           { name: "category", label: "Categoría", type: "creatable-select" },
-          { name: "price", label: "Precio ARS", type: "number" },
+          { name: "priceMode", label: "Arancel", type: "select", options: PRICE_MODE_OPTIONS },
+          {
+            name: "price",
+            label: "Precio general (ARS)",
+            type: "number",
+            showWhen: { field: "priceMode", in: ["general"] },
+          },
+          {
+            name: "memberPrice",
+            label: "Precio socios (ARS)",
+            type: "number",
+            showWhen: { field: "priceMode", in: ["members"] },
+          },
+          {
+            name: "nonMemberPrice",
+            label: "Precio no socios (ARS)",
+            type: "number",
+            showWhen: { field: "priceMode", in: ["members"] },
+          },
           { name: "quota", label: "Cupo (opcional)", type: "number" },
           { name: "imageUrl", label: "Imagen" },
           { name: "description", label: "Descripción", type: "textarea" },

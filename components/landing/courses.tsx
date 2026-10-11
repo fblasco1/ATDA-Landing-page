@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { isFreeCourse } from "@/lib/courses/pricing";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
-import { formatARS } from "@/lib/utils";
 import type { Course } from "@/lib/sanity/types";
+import { CoursePrice } from "./course-price";
 import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-band";
 
 export function Courses({
@@ -68,13 +69,15 @@ function CourseCard({ course, band }: { course: Course; band: SectionBand }) {
       </div>
       <h3 className="text-xl font-bold text-white">{course.title}</h3>
       <p className="mt-2 flex-1 text-gray-400">{course.description}</p>
-      <p className="mt-4 text-2xl font-extrabold text-teal-300">{formatARS(course.price)}</p>
+      <div className="mt-4">
+        <CoursePrice course={course} />
+      </div>
       {finished ? null : (
         <Link
           href={`/propuestas/${course.slug}`}
           className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-2 text-center font-semibold text-white hover:bg-blue-700"
         >
-          {isModoCheckoutEnabled() ? "Inscribirme" : "Ver curso"}
+          {isFreeCourse(course) || isModoCheckoutEnabled() ? "Inscribirme" : "Ver curso"}
         </Link>
       )}
     </article>
