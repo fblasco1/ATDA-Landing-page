@@ -6,13 +6,14 @@ export default async function AdminProjectsPage() {
 
   return (
     <div>
-      <h1 className="mb-2 text-3xl font-bold text-white">Actividad</h1>
+      <h1 className="mb-2 text-3xl font-bold text-white">Novedades</h1>
       <p className="mb-6 text-gray-400">
         Noticias y columnas. En la landing se ven las 3 más recientes; el resto en Ver todas, filtrable por categoría.
       </p>
       <CollectionManager
         type="project"
         items={items}
+        createdMessage="Creada. Si está publicada, se ve en la sección Novedades."
         fields={[
           { name: "title", label: "Título" },
           { name: "category", label: "Categoría", type: "creatable-select" },

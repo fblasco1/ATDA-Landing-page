@@ -5,7 +5,6 @@ import {
   allCoursesQuery,
   allProjectsQuery,
   enrollmentsQuery,
-  focusAreasQuery,
   landingSettingsQuery,
   partnersQuery,
 } from "./queries";
@@ -29,7 +28,6 @@ export async function fetchAdminSettings() {
 export async function listDocuments(type: string) {
   const client = getWriteClient();
   const queries: Record<string, string> = {
-    focusArea: focusAreasQuery,
     project: allProjectsQuery,
     networkPartner: partnersQuery,
     course: allCoursesQuery,

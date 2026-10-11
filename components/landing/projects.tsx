@@ -7,11 +7,11 @@ export function Projects({ projects, band = "base" }: { projects: Project[]; ban
   if (projects.length === 0) return null;
 
   return (
-    <section id="projects" className={`${sectionBandClass(band)} py-20`}>
+    <section id="novedades" className={`${sectionBandClass(band)} py-20`}>
       <div className="container mx-auto px-6">
         <div className="mb-12 text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-teal-400">Actualidad</p>
-          <h2 className="text-3xl font-extrabold text-white md:text-4xl">Actividad</h2>
+          <h2 className="text-3xl font-extrabold text-white md:text-4xl">Novedades</h2>
           <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">
             Las últimas publicaciones sobre tecnología, industria y desarrollo en Argentina.
           </p>
@@ -23,7 +23,7 @@ export function Projects({ projects, band = "base" }: { projects: Project[]; ban
         </div>
         <div className="mt-12 text-center">
           <Link
-            href="/actividad"
+            href="/novedades"
             className="inline-block rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-blue-700"
           >
             Ver todas las publicaciones

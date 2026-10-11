@@ -25,13 +25,6 @@ export const landingSettingsQuery = `*[_id == "${LANDING_SETTINGS_ID}"][0]{
   statuteUrl
 }`;
 
-export const focusAreasQuery = `*[_type == "focusArea"] | order(_createdAt asc){
-  _id,
-  title,
-  description,
-  icon
-}`;
-
 export const projectsQuery = `*[_type == "project" && published == true] | order(_createdAt desc)[0...3]{
   _id,
   title,

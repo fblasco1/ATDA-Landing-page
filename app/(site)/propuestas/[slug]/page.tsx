@@ -15,8 +15,8 @@ export default async function CoursePage({ params }: Props) {
   return (
     <div className="min-h-screen bg-gray-900 px-6 py-16">
       <div className="container mx-auto max-w-5xl">
-        <Link href="/cursos" className="text-blue-400 hover:text-blue-300">
-          ← Volver a Cursos
+        <Link href="/propuestas" className="text-blue-400 hover:text-blue-300">
+          ← Volver a Propuestas
         </Link>
         <div className="mt-8 grid gap-10 lg:grid-cols-2">
           <div>

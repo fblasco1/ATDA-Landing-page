@@ -36,10 +36,10 @@ export default async function ActivityArticlePage({ params }: Props) {
       <main className="px-6 py-12 md:py-16">
         <article className="container mx-auto max-w-3xl">
           <Link
-            href="/actividad"
+            href="/novedades"
             className="inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300"
           >
-            <span aria-hidden>←</span> Volver a Actividad
+            <span aria-hidden>←</span> Volver a Novedades
           </Link>
 
           {article.category ? (

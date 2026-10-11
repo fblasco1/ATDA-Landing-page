@@ -160,7 +160,7 @@ export function Contact({
                   </option>
                   <option value="Consulta">Consulta</option>
                   <option value="Propuesta">Propuesta</option>
-                  <option value="Cursos">Cursos</option>
+                  <option value="Cursos y actividades">Cursos y actividades</option>
                   <option value="Otro">Otro</option>
                 </select>
               </Field>

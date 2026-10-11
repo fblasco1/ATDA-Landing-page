@@ -33,11 +33,13 @@ export function CollectionManager({
   fields,
   items,
   titleField = "title",
+  createdMessage = "Creado. Ya se ve en la landing.",
 }: {
   type: string;
   fields: Field[];
   items: Item[];
   titleField?: string;
+  createdMessage?: string;
 }) {
   const [rows, setRows] = useState(() => normalizeItems(items));
   const [status, setStatus] = useState("");
@@ -109,7 +111,7 @@ export function CollectionManager({
     const result = (await response.json().catch(() => ({}))) as { error?: string };
     if (response.ok) {
       setFormKey((key) => key + 1);
-      setStatus("Creado. La sección se verá en la landing.");
+      setStatus(createdMessage);
       await refresh();
     } else {
       setStatus(result.error ?? "No se pudo crear");

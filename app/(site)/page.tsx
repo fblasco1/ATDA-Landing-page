@@ -1,7 +1,6 @@
 import { About } from "@/components/landing/about";
 import { Contact } from "@/components/landing/contact";
 import { Courses } from "@/components/landing/courses";
-import { FocusAreas } from "@/components/landing/focus-areas";
 import { Footer } from "@/components/landing/footer";
 import { Hero } from "@/components/landing/hero";
 import { JoinUs } from "@/components/landing/join-us";
@@ -15,7 +14,6 @@ export default async function HomePage() {
   const nextBand = createBandAllocator();
 
   const aboutBand = nextBand();
-  const focusBand = content.focusAreas.length ? nextBand() : undefined;
   const projectsBand = content.projects.length ? nextBand() : undefined;
   const networkBand = content.partners.length ? nextBand() : undefined;
   const coursesBand = content.courses.length ? nextBand() : undefined;
@@ -26,7 +24,6 @@ export default async function HomePage() {
       <main>
         <Hero settings={content.settings} />
         <About settings={content.settings} band={aboutBand} />
-        {focusBand ? <FocusAreas areas={content.focusAreas} band={focusBand} /> : null}
         {projectsBand ? <Projects projects={content.projects} band={projectsBand} /> : null}
         {networkBand ? <Network partners={content.partners} band={networkBand} /> : null}
         {coursesBand ? <Courses courses={content.courses} band={coursesBand} /> : null}

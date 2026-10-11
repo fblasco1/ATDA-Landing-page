@@ -6,14 +6,15 @@ export default async function AdminCoursesPage() {
 
   return (
     <div>
-      <h1 className="mb-2 text-3xl font-bold text-white">Cursos</h1>
+      <h1 className="mb-2 text-3xl font-bold text-white">Propuestas</h1>
       <p className="mb-6 text-gray-400">
-        Un curso aparece en la landing si está activo y tiene precio. Las categorías se crean al vuelo y sirven para
-        filtrar en /cursos.
+        Cursos y actividades. Se muestran en la sección Propuestas de la landing y en /propuestas si están activos y
+        tienen precio. Las categorías se crean al vuelo y sirven para filtrar.
       </p>
       <CollectionManager
         type="course"
         items={items}
+        createdMessage="Creada. Se ve en la sección Propuestas."
         fields={[
           { name: "title", label: "Título" },
           { name: "category", label: "Categoría", type: "creatable-select" },

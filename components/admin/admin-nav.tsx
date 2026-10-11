@@ -7,10 +7,9 @@ import { signOut } from "next-auth/react";
 const links = [
   { href: "/admin", label: "Resumen" },
   { href: "/admin/contenido", label: "Landing" },
-  { href: "/admin/areas", label: "Áreas" },
-  { href: "/admin/proyectos", label: "Actividad" },
+  { href: "/admin/proyectos", label: "Novedades" },
   { href: "/admin/red", label: "Red" },
-  { href: "/admin/cursos", label: "Cursos" },
+  { href: "/admin/cursos", label: "Propuestas" },
   { href: "/admin/inscripciones", label: "Inscripciones" },
   { href: "/admin/socios", label: "Socios" },
 ];

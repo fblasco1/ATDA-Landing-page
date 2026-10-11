@@ -41,13 +41,6 @@ export type LandingSettings = {
   statuteUrl?: string;
 };
 
-export type FocusArea = {
-  _id: string;
-  title: string;
-  description: string;
-  icon: FocusIcon;
-};
-
 export type Project = {
   _id: string;
   title: string;
@@ -105,7 +98,6 @@ export type Enrollment = {
 
 export type LandingContent = {
   settings: LandingSettings;
-  focusAreas: FocusArea[];
   projects: Project[];
   partners: NetworkPartner[];
   courses: Course[];

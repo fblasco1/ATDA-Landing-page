@@ -15,10 +15,15 @@ type NavItem = {
 
 const ALL_NAV_ITEMS: NavItem[] = [
   { name: "Sobre Nosotros", href: "/#about", sectionId: "about" },
-  { name: "Áreas de Enfoque", href: "/#focus-areas", sectionId: "focus-areas" },
-  { name: "Actividad", href: "/actividad", sectionId: "projects", matchPath: "/actividad" },
+  { name: "Novedades", href: "/novedades", sectionId: "novedades", matchPath: "/novedades" },
   { name: "Red", href: "/#network", sectionId: "network", requires: "network" },
-  { name: "Cursos", href: "/cursos", sectionId: "cursos", matchPath: "/cursos", requires: "courses" },
+  {
+    name: "Propuestas",
+    href: "/propuestas",
+    sectionId: "propuestas",
+    matchPath: "/propuestas",
+    requires: "courses",
+  },
   { name: "Contacto", href: "/#contact", sectionId: "contact" },
 ];
 

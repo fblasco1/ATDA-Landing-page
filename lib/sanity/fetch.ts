@@ -9,7 +9,6 @@ import {
   coursesQuery,
   enrollmentByIdQuery,
   enrollmentsQuery,
-  focusAreasQuery,
   landingSettingsQuery,
   partnersQuery,
   projectBySlugQuery,
@@ -20,7 +19,6 @@ import {
 import type {
   Course,
   Enrollment,
-  FocusArea,
   LandingContent,
   LandingSettings,
   NetworkPartner,
@@ -29,7 +27,6 @@ import type {
 
 const emptyLanding = (): LandingContent => ({
   settings: defaultLandingSettings,
-  focusAreas: [],
   projects: [],
   partners: [],
   courses: [],
@@ -40,9 +37,8 @@ async function loadLandingContent(): Promise<LandingContent> {
   if (!client) return emptyLanding();
 
   try {
-    const [settings, focusAreas, projects, partners, courses] = await Promise.all([
+    const [settings, projects, partners, courses] = await Promise.all([
       client.fetch<LandingSettings | null>(landingSettingsQuery),
-      client.fetch<FocusArea[]>(focusAreasQuery),
       client.fetch<Project[]>(projectsQuery),
       client.fetch<NetworkPartner[]>(partnersQuery),
       client.fetch<Course[]>(coursesQuery),
@@ -62,7 +58,6 @@ async function loadLandingContent(): Promise<LandingContent> {
           ? settings.joinEligibility
           : defaultLandingSettings.joinEligibility,
       },
-      focusAreas: focusAreas ?? [],
       projects: projects ?? [],
       partners: partners ?? [],
       courses: courses ?? [],

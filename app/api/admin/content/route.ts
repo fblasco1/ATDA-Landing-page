@@ -2,7 +2,7 @@ import { requireAdminApi } from "@/lib/admin/session";
 import { createDocument, listDocuments } from "@/lib/sanity/write";
 import { revalidateTag } from "next/cache";
 
-const allowed = new Set(["focusArea", "project", "networkPartner", "course"]);
+const allowed = new Set(["project", "networkPartner", "course"]);
 
 export async function GET(request: Request) {
   const { error } = await requireAdminApi();
