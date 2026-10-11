@@ -3,7 +3,11 @@
 import { useState, type FormEvent } from "react";
 import type { Member } from "@/lib/db/schema";
 
-export function NewMemberForm({ onCreated }: { onCreated: (member: Member) => void }) {
+export function NewMemberForm({
+  onCreated,
+}: {
+  onCreated: (member: Member, email: { sent: boolean; error?: string }) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -19,13 +23,18 @@ export function NewMemberForm({ onCreated }: { onCreated: (member: Member) => vo
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = (await response.json().catch(() => ({}))) as { error?: string; member?: Member };
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      member?: Member;
+      emailSent?: boolean;
+      emailError?: string;
+    };
     setBusy(false);
     if (!response.ok || !data.member) {
       setError(data.error ?? "No se pudo crear el socio");
       return;
     }
-    onCreated(data.member);
+    onCreated(data.member, { sent: Boolean(data.emailSent), error: data.emailError });
     setFormKey((key) => key + 1);
     setOpen(false);
   };

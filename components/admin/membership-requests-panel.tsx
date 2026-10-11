@@ -44,6 +44,8 @@ export function MembershipRequestsPanel({
     const data = (await response.json()) as {
       error?: string;
       request?: MembershipRequest;
+      emailSent?: boolean;
+      emailError?: string;
     };
     setBusyId(null);
     if (!response.ok) {
@@ -54,9 +56,13 @@ export function MembershipRequestsPanel({
       setItems((current) => current.map((row) => (row.id === id ? data.request! : row)));
     }
     setMessage(
-      status === "approved"
-        ? "Solicitud aprobada y socio creado (si no existía)."
-        : `Estado actualizado: ${STATUS_LABEL[status]}`,
+      status !== "approved"
+        ? `Estado actualizado: ${STATUS_LABEL[status]}`
+        : data.emailSent
+          ? "Solicitud aprobada. Le enviamos el mail para activar su acceso."
+          : data.emailError
+            ? `Solicitud aprobada, pero no se pudo enviar el mail (${data.emailError}). Podés reenviarlo desde la ficha del socio.`
+            : "Solicitud aprobada. El socio ya tenía el acceso activado.",
     );
   };
 

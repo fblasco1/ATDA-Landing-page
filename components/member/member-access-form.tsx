@@ -6,8 +6,10 @@ import { useState, type FormEvent } from "react";
 
 export function MemberAccessForm({
   mode,
+  defaultEmail,
 }: {
   mode: "activate" | "recover";
+  defaultEmail?: string;
 }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
@@ -53,7 +55,14 @@ export function MemberAccessForm({
       <h2 className="sr-only">{title}</h2>
       <label className="block text-sm text-gray-400">
         Email de socio
-        <input name="email" type="email" required autoComplete="email" className={inputClass} />
+        <input
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          defaultValue={defaultEmail}
+          className={inputClass}
+        />
       </label>
       <label className="block text-sm text-gray-400">
         DNI

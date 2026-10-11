@@ -11,6 +11,7 @@ import {
   updateMembershipFee,
 } from "@/lib/db/members";
 import type { Member, MembershipFee } from "@/lib/db/schema";
+import { sendMemberActivationEmail } from "@/lib/email/members";
 
 export async function GET(request: Request) {
   const { error } = await requireAdminApi();
@@ -71,7 +72,15 @@ export async function POST(request: Request) {
       status: ["active", "suspended", "inactive"].includes(status) ? status : "active",
       notes: text("notes"),
     });
-    return NextResponse.json({ member });
+    const activation =
+      member.status === "active"
+        ? await sendMemberActivationEmail(member, { request, idempotencyKey: `activation-member-${member.id}-${member.email}` })
+        : null;
+    return NextResponse.json({
+      member,
+      emailSent: activation?.ok ?? false,
+      emailError: activation && !activation.ok ? activation.error : undefined,
+    });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : "Error" }, { status: 400 });
   }

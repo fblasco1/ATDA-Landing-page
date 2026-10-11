@@ -105,9 +105,15 @@ export function MembersAdminPanel({
   return (
     <div className="space-y-4">
       <NewMemberForm
-        onCreated={(member) => {
+        onCreated={(member, email) => {
           setItems((current) => [{ member, latestFee: null, feesCount: 0 }, ...current]);
-          setMessage(`Socio ${member.fullName} creado`);
+          setMessage(
+            email.sent
+              ? `Socio ${member.fullName} creado. Le enviamos el mail para activar su acceso.`
+              : email.error
+                ? `Socio ${member.fullName} creado, pero no se pudo enviar el mail (${email.error}).`
+                : `Socio ${member.fullName} creado.`,
+          );
         }}
       />
       <div className="flex flex-wrap items-center gap-3">

@@ -7,6 +7,7 @@ import {
   updateMembershipRequestStatus,
 } from "@/lib/db/members";
 import type { MembershipRequest } from "@/lib/db/schema";
+import { sendMemberActivationEmail } from "@/lib/email/members";
 
 export async function GET(request: Request) {
   const { error } = await requireAdminApi();
@@ -44,8 +45,21 @@ export async function PATCH(request: Request) {
     }
 
     if (body.status === "approved") {
-      const result = await approveMembershipRequest(body.id, body.adminNotes);
-      return NextResponse.json({ ok: true, ...result });
+      const { request: approvedRequest, member } = await approveMembershipRequest(body.id, body.adminNotes);
+      const needsActivation = member.status === "active" && !member.passwordHash;
+      const email = needsActivation
+        ? await sendMemberActivationEmail(member, {
+            request,
+            idempotencyKey: `activation-request-${body.id}-${member.email}`,
+          })
+        : null;
+      return NextResponse.json({
+        ok: true,
+        request: approvedRequest,
+        memberId: member.id,
+        emailSent: email?.ok ?? false,
+        emailError: email && !email.ok ? email.error : undefined,
+      });
     }
 
     const allowed: MembershipRequest["status"][] = ["received", "reviewing", "rejected"];

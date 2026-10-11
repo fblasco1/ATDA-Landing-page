@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { notifyNewMembershipRequest } from "@/lib/email/members";
 import {
   createMembershipRequest,
   findOpenRequestByEmail,
@@ -65,6 +66,13 @@ export async function POST(request: Request) {
       roleTitle: roleTitle || undefined,
       motivation: motivation || undefined,
     });
+
+    after(() =>
+      notifyNewMembershipRequest(
+        { id: row.id, fullName, email, profession, organization: organization || undefined },
+        request,
+      ),
+    );
 
     return NextResponse.json({ ok: true, id: row.id });
   } catch (error) {
