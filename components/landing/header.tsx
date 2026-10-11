@@ -32,7 +32,8 @@ function scrollToHash(href: string) {
   if (!hash.startsWith("#")) return;
   const target = document.getElementById(hash.slice(1));
   if (!target) return;
-  const offset = target.getBoundingClientRect().top + window.pageYOffset - 80;
+  const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 80;
+  const offset = target.getBoundingClientRect().top + window.scrollY - headerHeight;
   window.scrollTo({ top: offset, behavior: "smooth" });
 }
 
@@ -144,7 +145,7 @@ export function Header({
             <ATDALogo className="h-12 w-auto" showSubtitle={false} />
           </Link>
 
-          <nav className="hidden items-center space-x-8 md:flex" aria-label="Principal">
+          <nav className="hidden items-center gap-6 whitespace-nowrap lg:flex xl:gap-8" aria-label="Principal">
             {navItems.map((item) => {
               const active = isActive(item);
               return (
@@ -161,7 +162,7 @@ export function Header({
             })}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-4 whitespace-nowrap lg:flex">
             <Link
               href="/socio/login"
               className={`text-sm ${
@@ -184,7 +185,7 @@ export function Header({
           <button
             type="button"
             onClick={() => setIsOpen((open) => !open)}
-            className="text-gray-300 focus:outline-none md:hidden"
+            className="text-gray-300 focus:outline-none lg:hidden"
             aria-label="Abrir menú"
             aria-expanded={isOpen}
           >
@@ -200,8 +201,8 @@ export function Header({
       </div>
 
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
-          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        className={`absolute inset-x-0 top-full overflow-hidden shadow-lg transition-all duration-300 ease-in-out lg:hidden ${
+          isOpen ? "max-h-screen opacity-100" : "pointer-events-none max-h-0 opacity-0"
         }`}
       >
         <div className="flex flex-col items-center space-y-4 bg-gray-900/95 py-4">

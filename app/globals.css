@@ -6,6 +6,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Altura del header fijo, para que los anclas no queden tapados. */
+  scroll-padding-top: 5.5rem;
 }
 
 body {
