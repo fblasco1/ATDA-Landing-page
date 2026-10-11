@@ -39,6 +39,12 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
     socialLinkedin: "Redes: LinkedIn",
     contactEmail: "Email de contacto",
     statuteUrl: "Estatuto",
+    legalName: "Datos institucionales: razón social",
+    legalCuit: "Datos institucionales: CUIT",
+    legalRegistration: "Datos institucionales: inscripción",
+    legalAddress: "Datos institucionales: domicilio",
+    privacyEmail: "Datos institucionales: email de privacidad",
+    privacyPolicy: "Política de privacidad",
   },
   project: {
     title: "Título",

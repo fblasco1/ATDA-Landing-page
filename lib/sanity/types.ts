@@ -55,6 +55,16 @@ export type LandingSettings = {
   socialLinkedin?: string;
   contactEmail?: string;
   statuteUrl?: string;
+  /** Razón social exacta según el estatuto / IGJ. */
+  legalName: string;
+  legalCuit: string;
+  /** Datos de inscripción, p. ej. "IGJ Resolución N.º 123/2024". */
+  legalRegistration: string;
+  legalAddress: string;
+  /** Email para consultas y derechos sobre datos personales. */
+  privacyEmail: string;
+  /** Texto de /privacidad. Vacío = texto base generado con los datos institucionales. */
+  privacyPolicy: string;
 };
 
 export type Project = {

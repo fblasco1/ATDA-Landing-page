@@ -39,6 +39,8 @@ export const membershipRequests = pgTable("membership_requests", {
   organization: varchar("organization", { length: 255 }),
   roleTitle: varchar("role_title", { length: 255 }),
   motivation: text("motivation"),
+  /** Constancia del consentimiento a la política de privacidad (Ley 25.326). Nula en solicitudes previas. */
+  privacyAcceptedAt: timestamp("privacy_accepted_at", { withTimezone: true }),
   status: membershipRequestStatusEnum("status").notNull().default("received"),
   adminNotes: text("admin_notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

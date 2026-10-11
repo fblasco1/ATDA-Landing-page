@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { PrivacyConsent } from "@/components/legal/privacy-consent";
 import type { LandingSettings } from "@/lib/sanity/types";
 import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-band";
 
@@ -20,6 +21,7 @@ export function Contact({
     message: "",
     website: "",
   });
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
@@ -46,6 +48,7 @@ export function Contact({
     if (formData.message.trim().length < 10) {
       errors.message = "El mensaje debe tener al menos 10 caracteres.";
     }
+    if (!privacyAccepted) errors.privacyAccepted = "Tenés que aceptar la política de privacidad.";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -71,11 +74,12 @@ export function Contact({
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, privacyAccepted: "Sí" }),
       });
       if (response.ok) {
         setStatus("success");
         setFormData({ name: "", email: "", phone: "", _subject: "", message: "", website: "" });
+        setPrivacyAccepted(false);
       } else {
         setStatus("error");
       }
@@ -182,7 +186,19 @@ export function Contact({
               </Field>
             </div>
 
-            <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+            <div className="mb-6">
+              <PrivacyConsent
+                checked={privacyAccepted}
+                disabled={disabled}
+                error={fieldErrors.privacyAccepted}
+                onChange={(checked) => {
+                  setPrivacyAccepted(checked);
+                  setFieldErrors(({ privacyAccepted: _removed, ...rest }) => rest);
+                }}
+              />
+            </div>
+
+            <div hidden>
               <label>
                 Sitio web
                 <input

@@ -87,6 +87,12 @@ export const defaultLandingSettings: LandingSettings = {
   socialLinkedin: "https://www.linkedin.com/company/atda-arg/",
   contactEmail: "mailto:mlopezbisio@gmail.com",
   statuteUrl: "https://drive.google.com/file/d/11EHh-8C7vRb_8dNqpscjGbAU0VpYUWs8/view?usp=drive_link",
+  legalName: "Asociación Civil Tecnológica por el Desarrollo Argentino",
+  legalCuit: "",
+  legalRegistration: "",
+  legalAddress: "",
+  privacyEmail: "",
+  privacyPolicy: "",
 };
 
 /** Nombres de secciones y menú: si quedan vacíos se usa el texto por defecto para no dejar huecos. */
@@ -101,6 +107,7 @@ const NON_EMPTY_FIELDS = new Set<keyof LandingSettings>([
   "networkTitle",
   "coursesTitle",
   "membershipTitle",
+  "legalName",
 ]);
 
 const NON_EMPTY_LISTS = ["aboutValues", "joinBenefits", "joinEligibility"] as const;

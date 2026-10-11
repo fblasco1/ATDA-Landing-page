@@ -61,10 +61,16 @@ async function loadLandingContent(): Promise<LandingContent> {
   }
 }
 
-export const getLandingContent = unstable_cache(loadLandingContent, ["landing-content"], {
+const getCachedLandingContent = unstable_cache(loadLandingContent, ["landing-content"], {
   tags: ["landing"],
   revalidate: 60,
 });
+
+/** El cache puede venir de un deploy anterior sin los campos nuevos: los defaults se completan al leer. */
+export async function getLandingContent(): Promise<LandingContent> {
+  const content = await getCachedLandingContent();
+  return { ...content, settings: mergeLandingSettings(content.settings) };
+}
 
 /** Tras guardar desde el panel, la próxima visita al sitio tiene que ver el cambio, no la versión anterior. */
 export function expireLandingCache() {

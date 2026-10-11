@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { PrivacyConsent } from "@/components/legal/privacy-consent";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -127,8 +128,10 @@ export function AffiliationForm() {
         />
       </Field>
 
+      <PrivacyConsent disabled={disabled} />
+
       {/* Honeypot */}
-      <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+      <div hidden>
         <label>
           Sitio web
           <input name="website" tabIndex={-1} autoComplete="off" />
