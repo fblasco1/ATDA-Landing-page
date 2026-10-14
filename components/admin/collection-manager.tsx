@@ -49,6 +49,7 @@ export function CollectionManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [busy, setBusy] = useState<string | null>(null);
+  const [previewLink, setPreviewLink] = useState("");
 
   const editing = useMemo(() => rows.find((row) => row._id === editingId), [rows, editingId]);
 
@@ -152,6 +153,40 @@ export function CollectionManager({
     }
   };
 
+  const handlePreview = async (form: HTMLFormElement | null, id?: string) => {
+    if (!form) return;
+    // La pestaña se abre antes del fetch para que el navegador no la bloquee como popup.
+    const tab = window.open("about:blank", "_blank");
+    setBusy(id ? `preview:${id}` : "preview");
+    setStatus("");
+    setPreviewLink("");
+    const response = await fetch("/api/admin/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "document", docType: type, id, data: readForm(new FormData(form)) }),
+    }).catch(() => null);
+    const result = (await response?.json().catch(() => ({}))) as { url?: string; error?: string } | undefined;
+    setBusy(null);
+    if (response?.ok && result?.url) {
+      if (tab) tab.location.href = result.url;
+      else setPreviewLink(result.url);
+    } else {
+      tab?.close();
+      setStatus(result?.error ?? "No se pudo abrir la vista previa");
+    }
+  };
+
+  const previewButton = (id?: string) => (
+    <button
+      type="button"
+      disabled={busy !== null}
+      onClick={(event) => void handlePreview(event.currentTarget.form, id)}
+      className="rounded-md border border-gray-600 px-4 py-2 text-gray-200 hover:border-gray-400 hover:text-white disabled:opacity-60"
+    >
+      {busy === (id ? `preview:${id}` : "preview") ? "Preparando..." : "Vista previa"}
+    </button>
+  );
+
   const handleDelete = async (id: string) => {
     if (!confirm("¿Eliminar este contenido?")) return;
     setBusy(`delete:${id}`);
@@ -171,15 +206,33 @@ export function CollectionManager({
       >
         <h3 className="font-semibold text-white">Nuevo</h3>
         <FieldGrid fields={fields} categorySuggestions={categorySuggestions} />
-        <button
-          type="submit"
-          disabled={busy !== null}
-          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
-        >
-          {busy === "create" ? "Creando..." : "Crear"}
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="submit"
+            disabled={busy !== null}
+            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
+          >
+            {busy === "create" ? "Creando..." : "Crear"}
+          </button>
+          {previewButton()}
+        </div>
       </form>
-      {status ? <p className="text-teal-300">{status}</p> : null}
+      {status ? (
+        <p role="status" className="text-teal-300">
+          {status}
+        </p>
+      ) : null}
+      {previewLink ? (
+        <a
+          href={previewLink}
+          target="_blank"
+          rel="noopener"
+          onClick={() => setPreviewLink("")}
+          className="text-teal-300 underline hover:text-teal-200"
+        >
+          Vista previa lista: abrir el sitio
+        </a>
+      ) : null}
       <ul className="space-y-3">
         {rows.map((row) => (
           <li key={row._id} className="rounded-lg border border-gray-800 p-4">
@@ -211,13 +264,16 @@ export function CollectionManager({
             {editingId === row._id && editing ? (
               <form onSubmit={handleUpdate} onChange={() => setStatus("")} className="mt-4 space-y-3">
                 <FieldGrid fields={fields} values={editing} categorySuggestions={categorySuggestions} />
-                <button
-                  type="submit"
-                  disabled={busy !== null}
-                  className="rounded-md bg-teal-600 px-4 py-2 text-white disabled:opacity-60"
-                >
-                  {busy === "update" ? "Guardando..." : "Guardar cambios"}
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    disabled={busy !== null}
+                    className="rounded-md bg-teal-600 px-4 py-2 text-white disabled:opacity-60"
+                  >
+                    {busy === "update" ? "Guardando..." : "Guardar cambios"}
+                  </button>
+                  {previewButton(row._id)}
+                </div>
               </form>
             ) : null}
           </li>

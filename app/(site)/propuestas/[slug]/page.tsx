@@ -4,14 +4,16 @@ import { CheckoutForm } from "@/components/checkout/checkout-form";
 import { CoursePrice } from "@/components/landing/course-price";
 import { isFreeCourse } from "@/lib/courses/pricing";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
-import { getCourseBySlug } from "@/lib/sanity/fetch";
-import { getSiteContent } from "@/lib/sanity/site-content";
+import { getSiteContent, getSiteCourseBySlug } from "@/lib/sanity/site-content";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function CoursePage({ params }: Props) {
   const { slug } = await params;
-  const [course, landing] = await Promise.all([getCourseBySlug(slug), getSiteContent()]);
+  const [{ document: course, preview }, landing] = await Promise.all([
+    getSiteCourseBySlug(slug),
+    getSiteContent(),
+  ]);
   if (!course) notFound();
 
   return (
@@ -31,7 +33,14 @@ export default async function CoursePage({ params }: Props) {
               <CoursePrice course={course} size="lg" />
             </div>
           </div>
-          {isFreeCourse(course) || isModoCheckoutEnabled() ? (
+          {preview ? (
+            <div className="rounded-xl bg-gray-800 p-6 shadow-xl">
+              <p className="text-lg font-semibold text-white">Inscripción</p>
+              <p className="mt-2 text-gray-400">
+                El formulario de inscripción aparece acá cuando guardes la propuesta.
+              </p>
+            </div>
+          ) : isFreeCourse(course) || isModoCheckoutEnabled() ? (
             <CheckoutForm course={course} />
           ) : (
             <div className="rounded-xl bg-gray-800 p-6 shadow-xl">
