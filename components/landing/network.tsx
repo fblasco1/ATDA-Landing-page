@@ -3,6 +3,8 @@ import type { NetworkPartner } from "@/lib/sanity/types";
 import { sectionBandClass, type SectionBand } from "./section-band";
 
 const TILE_BACKGROUND: Record<NonNullable<NetworkPartner["logoBackground"]>, string> = {
+  glass:
+    "border border-white/10 bg-white/5 backdrop-blur-md transition-colors duration-300 group-hover:border-white/20 group-hover:bg-white/10",
   white: "bg-white shadow-sm",
   dark: "bg-gray-800/80 ring-1 ring-white/10",
   none: "",
@@ -10,7 +12,7 @@ const TILE_BACKGROUND: Record<NonNullable<NetworkPartner["logoBackground"]>, str
 
 function PartnerTile({ partner }: { partner: NetworkPartner }) {
   const href = normalizeExternalUrl(partner.url);
-  const background = TILE_BACKGROUND[partner.logoBackground ?? "white"];
+  const background = TILE_BACKGROUND[partner.logoBackground ?? "glass"];
   const inner = (
     <>
       <div className={`flex h-24 w-full max-w-44 items-center justify-center rounded-2xl p-4 sm:h-32 sm:w-52 sm:max-w-none ${background}`}>
@@ -18,7 +20,11 @@ function PartnerTile({ partner }: { partner: NetworkPartner }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={partner.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
         ) : (
-          <span className="text-2xl font-bold text-slate-600">{partner.name.slice(0, 1)}</span>
+          <span
+            className={`text-2xl font-bold ${partner.logoBackground === "white" ? "text-slate-600" : "text-gray-300"}`}
+          >
+            {partner.name.slice(0, 1)}
+          </span>
         )}
       </div>
       <p className="mt-4 max-w-[13rem] text-center text-sm font-semibold leading-snug text-white sm:text-base">
@@ -28,7 +34,7 @@ function PartnerTile({ partner }: { partner: NetworkPartner }) {
   );
 
   const className =
-    "flex flex-col items-center justify-start transition duration-300 hover:-translate-y-1";
+    "group flex flex-col items-center justify-start transition duration-300 hover:-translate-y-1";
 
   if (href) {
     return (
