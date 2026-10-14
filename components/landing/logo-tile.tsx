@@ -33,9 +33,12 @@ export function PartnerLogo({
   logoUrl,
   name,
   interactive = true,
+  decorative = false,
 }: {
   logoUrl?: string;
   name: string;
+  /** El nombre ya figura como texto al lado: la imagen no se anuncia. */
+  decorative?: boolean;
   /** Sube la opacidad con hover/foco del contenedor `group`. */
   interactive?: boolean;
 }) {
@@ -53,7 +56,7 @@ export function PartnerLogo({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={logoUrl}
-      alt={name}
+      alt={decorative ? "" : name}
       width={width}
       height={height}
       style={{ width, height }}
