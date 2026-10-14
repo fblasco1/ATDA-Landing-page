@@ -88,8 +88,11 @@ export type NetworkPartner = {
   name: string;
   url?: string;
   logoUrl?: string;
-  logoBackground?: "glass" | "white" | "dark" | "none";
+  /** Tarjeta elegida al procesar el logo; vacío en logos cargados antes. */
+  logoSurface?: LogoSurface;
 };
+
+export type LogoSurface = "glass" | "light";
 
 export type CoursePriceMode = "general" | "members" | "free";
 

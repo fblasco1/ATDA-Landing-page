@@ -2,12 +2,13 @@
 
 import { normalizeExternalUrl, slugify } from "@/lib/utils";
 import { useMemo, useRef, useState, type FormEvent } from "react";
+import { LogoTile, resolveLogoSurface } from "@/components/landing/logo-tile";
 import { IconPicker } from "./icon-picker";
 
 export type Field = {
   name: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "checkbox" | "select" | "creatable-select" | "icon";
+  type?: "text" | "textarea" | "number" | "checkbox" | "select" | "creatable-select" | "icon" | "logo";
   options?: Array<{ value: string; label: string }>;
   rows?: number;
   /** Solo se muestra si el select `field` tiene alguno de estos valores. */
@@ -71,6 +72,9 @@ export function CollectionManager({
         data[field.name] = value ? Number(value) : undefined;
       } else if (field.type === "creatable-select") {
         data[field.name] = String(form.get(field.name) ?? "").trim();
+      } else if (field.type === "logo") {
+        data[field.name] = String(form.get(field.name) ?? "");
+        data.logoSurface = String(form.get("logoSurface") ?? "") || undefined;
       } else {
         data[field.name] = String(form.get(field.name) ?? "");
       }
@@ -317,6 +321,17 @@ function FieldGrid({
             </label>
           );
         }
+        if (field.type === "logo") {
+          return (
+            <ImageDropField
+              key={field.name}
+              name={field.name}
+              label={field.label}
+              defaultValue={typeof value === "string" ? value : ""}
+              logo={{ surface: typeof values?.logoSurface === "string" ? values.logoSurface : undefined }}
+            />
+          );
+        }
         if (field.name === "imageUrl" || field.name === "logoUrl") {
           return (
             <ImageDropField
@@ -407,24 +422,38 @@ function ImageDropField({
   name,
   label,
   defaultValue,
+  logo,
 }: {
   name: string;
   label: string;
   defaultValue: string;
+  /** Procesa el archivo como logo y muestra cómo queda en la tarjeta del sitio. */
+  logo?: { surface?: string };
 }) {
   const [url, setUrl] = useState(defaultValue);
+  const [surface, setSurface] = useState(logo?.surface ?? "");
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
     setUploading(true);
+    setUploadError("");
     const form = new FormData();
     form.append("file", file);
-    const response = await fetch("/api/admin/upload", { method: "POST", body: form });
-    const data = (await response.json()) as { url?: string; error?: string };
-    if (data.url) setUrl(data.url);
+    if (logo) form.append("kind", "logo");
+    const response = await fetch("/api/admin/upload", { method: "POST", body: form }).catch(() => null);
+    const data = (await response?.json().catch(() => ({}))) as
+      | { url?: string; surface?: string; error?: string }
+      | undefined;
+    if (data?.url) {
+      setUrl(data.url);
+      setSurface(data.surface ?? "");
+    } else {
+      setUploadError(data?.error ?? "No se pudo subir la imagen. Probá de nuevo.");
+    }
     setUploading(false);
   };
 
@@ -432,6 +461,7 @@ function ImageDropField({
     <div className="md:col-span-2 space-y-2">
       <span className="block text-sm text-gray-400">{label}</span>
       <input type="hidden" name={name} value={url} />
+      {logo ? <input type="hidden" name="logoSurface" value={surface} /> : null}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -458,15 +488,39 @@ function ImageDropField({
             : "border-gray-600 bg-gray-900/80 text-gray-400 hover:border-gray-400 hover:text-gray-200"
         }`}
       >
-        {url ? (
+        {url && !logo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt="" className="mb-2 max-h-28 rounded object-contain" />
         ) : null}
         <span className="text-sm font-medium">
-          {uploading ? "Subiendo..." : "Arrastrá una imagen o hacé clic para elegir"}
+          {uploading
+            ? logo
+              ? "Subiendo y ajustando el logo..."
+              : "Subiendo..."
+            : "Arrastrá una imagen o hacé clic para elegir"}
         </span>
-        <span className="text-xs text-gray-500">PNG, JPG o WebP</span>
+        <span className="text-xs text-gray-500">
+          {logo
+            ? "PNG, JPG, WebP o SVG. Recortamos los márgenes y quitamos el fondo liso automáticamente."
+            : "PNG, JPG o WebP"}
+        </span>
       </button>
+      {logo && url ? (
+        <div className="rounded-lg bg-gray-800 p-4">
+          <p className="mb-3 text-xs text-gray-400">Así se ve en la sección Nuestra Red:</p>
+          <LogoTile
+            logoUrl={url}
+            surface={resolveLogoSurface(url, surface)}
+            name=""
+            className="h-32 w-52"
+          />
+        </div>
+      ) : null}
+      {uploadError ? (
+        <p role="alert" className="text-sm text-red-400">
+          {uploadError}
+        </p>
+      ) : null}
       <input
         ref={inputRef}
         type="file"
@@ -478,7 +532,14 @@ function ImageDropField({
         }}
       />
       {url ? (
-        <button type="button" className="text-xs text-red-400 hover:text-red-300" onClick={() => setUrl("")}>
+        <button
+          type="button"
+          className="text-xs text-red-400 hover:text-red-300"
+          onClick={() => {
+            setUrl("");
+            setSurface("");
+          }}
+        >
           Quitar imagen
         </button>
       ) : null}

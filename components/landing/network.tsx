@@ -1,32 +1,18 @@
 import { normalizeExternalUrl } from "@/lib/utils";
 import type { NetworkPartner } from "@/lib/sanity/types";
+import { LogoTile, resolveLogoSurface } from "./logo-tile";
 import { sectionBandClass, type SectionBand } from "./section-band";
-
-const TILE_BACKGROUND: Record<NonNullable<NetworkPartner["logoBackground"]>, string> = {
-  glass:
-    "border border-white/10 bg-white/5 backdrop-blur-md transition-colors duration-300 group-hover:border-white/20 group-hover:bg-white/10",
-  white: "bg-white shadow-sm",
-  dark: "bg-gray-800/80 ring-1 ring-white/10",
-  none: "",
-};
 
 function PartnerTile({ partner }: { partner: NetworkPartner }) {
   const href = normalizeExternalUrl(partner.url);
-  const background = TILE_BACKGROUND[partner.logoBackground ?? "glass"];
   const inner = (
     <>
-      <div className={`flex h-24 w-full max-w-44 items-center justify-center rounded-2xl p-4 sm:h-32 sm:w-52 sm:max-w-none ${background}`}>
-        {partner.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={partner.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
-        ) : (
-          <span
-            className={`text-2xl font-bold ${partner.logoBackground === "white" ? "text-slate-600" : "text-gray-300"}`}
-          >
-            {partner.name.slice(0, 1)}
-          </span>
-        )}
-      </div>
+      <LogoTile
+        logoUrl={partner.logoUrl}
+        surface={resolveLogoSurface(partner.logoUrl, partner.logoSurface)}
+        name={partner.name}
+        className="h-24 w-full max-w-44 sm:h-32 sm:w-52 sm:max-w-none"
+      />
       <p className="mt-4 max-w-[13rem] text-center text-sm font-semibold leading-snug text-white sm:text-base">
         {partner.name}
       </p>

@@ -103,7 +103,7 @@ export const partnersQuery = `*[_type == "networkPartner"] | order(name asc){
   name,
   url,
   "logoUrl": coalesce(logo.asset->url, logoUrl),
-  logoBackground
+  logoSurface
 }`;
 
 const courseProjection = `{

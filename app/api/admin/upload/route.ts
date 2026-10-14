@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     if (!(file instanceof File)) {
       return Response.json({ error: "Archivo requerido" }, { status: 400 });
     }
-    const asset = await uploadImage(file);
+    const asset = await uploadImage(file, { logo: form.get("kind") === "logo" });
     return Response.json(asset);
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : "Error" }, { status: 500 });

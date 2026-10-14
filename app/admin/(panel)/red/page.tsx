@@ -8,9 +8,8 @@ export default async function AdminNetworkPage() {
     <div>
       <h1 className="mb-2 text-3xl font-bold text-white">Red</h1>
       <p className="mb-6 text-gray-400">
-        La sección Nuestra Red solo se ve si hay aliados cargados. El logo se ajusta y centra solo. Para que se vea
-        con sus colores originales sobre la tarjeta translúcida, subí el logo en PNG o SVG con fondo transparente. Si
-        solo tenés un JPG con fondo blanco, elegí el fondo &quot;Blanco&quot;.
+        La sección Nuestra Red solo se ve si hay aliados cargados. Subí el logo como lo tengas (JPG, PNG o SVG): el
+        sitio recorta los márgenes, quita el fondo liso y elige la tarjeta que mejor lo muestra.
       </p>
       <CollectionManager
         type="networkPartner"
@@ -19,18 +18,7 @@ export default async function AdminNetworkPage() {
         fields={[
           { name: "name", label: "Nombre" },
           { name: "url", label: "Sitio web" },
-          {
-            name: "logoBackground",
-            label: "Fondo del logo",
-            type: "select",
-            options: [
-              { value: "glass", label: "Translúcido (logo PNG/SVG sin fondo)" },
-              { value: "white", label: "Blanco (logo JPG con fondo blanco)" },
-              { value: "dark", label: "Oscuro" },
-              { value: "none", label: "Sin fondo" },
-            ],
-          },
-          { name: "logoUrl", label: "Logo" },
+          { name: "logoUrl", label: "Logo", type: "logo" },
         ]}
       />
     </div>
