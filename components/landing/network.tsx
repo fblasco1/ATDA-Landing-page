@@ -1,44 +1,43 @@
 import { normalizeExternalUrl } from "@/lib/utils";
 import type { NetworkPartner } from "@/lib/sanity/types";
+import { PartnerLogo } from "./logo-tile";
 import { sectionBandClass, type SectionBand } from "./section-band";
 
-const TILE_BACKGROUND: Record<NonNullable<NetworkPartner["logoBackground"]>, string> = {
-  white: "bg-white shadow-sm",
-  dark: "bg-gray-800/80 ring-1 ring-white/10",
-  none: "",
-};
-
-function PartnerTile({ partner }: { partner: NetworkPartner }) {
+function PartnerItem({ partner }: { partner: NetworkPartner }) {
   const href = normalizeExternalUrl(partner.url);
-  const background = TILE_BACKGROUND[partner.logoBackground ?? "white"];
-  const inner = (
+  const className = "group flex flex-col items-center gap-3 rounded-lg px-2 py-1";
+  const content = (
     <>
-      <div className={`flex h-24 w-full max-w-44 items-center justify-center rounded-2xl p-4 sm:h-32 sm:w-52 sm:max-w-none ${background}`}>
-        {partner.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={partner.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
-        ) : (
-          <span className="text-2xl font-bold text-slate-600">{partner.name.slice(0, 1)}</span>
-        )}
-      </div>
-      <p className="mt-4 max-w-[13rem] text-center text-sm font-semibold leading-snug text-white sm:text-base">
-        {partner.name}
-      </p>
+      <span className="flex h-16 items-center justify-center">
+        <PartnerLogo
+          logoUrl={partner.logoUrl}
+          name={partner.name}
+          interactive={Boolean(href)}
+          decorative={Boolean(partner.logoUrl)}
+        />
+      </span>
+      {partner.logoUrl ? (
+        <span
+          className={`max-w-[11rem] text-center text-xs leading-snug text-gray-400 transition-colors duration-300 sm:text-sm ${
+            href ? "group-hover:text-gray-200 group-focus-visible:text-gray-200" : ""
+          }`}
+        >
+          {partner.name}
+        </span>
+      ) : null}
     </>
   );
 
-  const className =
-    "flex flex-col items-center justify-start transition duration-300 hover:-translate-y-1";
-
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className} title={partner.name}>
-        {inner}
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {content}
+        <span className="sr-only"> (se abre en una pestaña nueva)</span>
       </a>
     );
   }
 
-  return <div className={className}>{inner}</div>;
+  return <div className={className}>{content}</div>;
 }
 
 export function Network({
@@ -61,11 +60,13 @@ export function Network({
           <h2 className="text-3xl font-extrabold text-white md:text-4xl">{title}</h2>
           {subtitle ? <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{subtitle}</p> : null}
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-10">
+        <ul className="mx-auto flex max-w-5xl flex-wrap items-start justify-center gap-x-12 gap-y-10 sm:gap-x-16">
           {partners.map((partner) => (
-            <PartnerTile key={partner._id} partner={partner} />
+            <li key={partner._id}>
+              <PartnerItem partner={partner} />
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

@@ -2,12 +2,13 @@
 
 import { normalizeExternalUrl, slugify } from "@/lib/utils";
 import { useMemo, useRef, useState, type FormEvent } from "react";
+import { PartnerLogo } from "@/components/landing/logo-tile";
 import { IconPicker } from "./icon-picker";
 
 export type Field = {
   name: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "checkbox" | "select" | "creatable-select" | "icon";
+  type?: "text" | "textarea" | "number" | "checkbox" | "select" | "creatable-select" | "icon" | "logo";
   options?: Array<{ value: string; label: string }>;
   rows?: number;
   /** Solo se muestra si el select `field` tiene alguno de estos valores. */
@@ -48,6 +49,7 @@ export function CollectionManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [busy, setBusy] = useState<string | null>(null);
+  const [previewLink, setPreviewLink] = useState("");
 
   const editing = useMemo(() => rows.find((row) => row._id === editingId), [rows, editingId]);
 
@@ -71,6 +73,8 @@ export function CollectionManager({
         data[field.name] = value ? Number(value) : undefined;
       } else if (field.type === "creatable-select") {
         data[field.name] = String(form.get(field.name) ?? "").trim();
+      } else if (field.type === "logo") {
+        data[field.name] = String(form.get(field.name) ?? "");
       } else {
         data[field.name] = String(form.get(field.name) ?? "");
       }
@@ -149,6 +153,40 @@ export function CollectionManager({
     }
   };
 
+  const handlePreview = async (form: HTMLFormElement | null, id?: string) => {
+    if (!form) return;
+    // La pestaña se abre antes del fetch para que el navegador no la bloquee como popup.
+    const tab = window.open("about:blank", "_blank");
+    setBusy(id ? `preview:${id}` : "preview");
+    setStatus("");
+    setPreviewLink("");
+    const response = await fetch("/api/admin/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "document", docType: type, id, data: readForm(new FormData(form)) }),
+    }).catch(() => null);
+    const result = (await response?.json().catch(() => ({}))) as { url?: string; error?: string } | undefined;
+    setBusy(null);
+    if (response?.ok && result?.url) {
+      if (tab) tab.location.href = result.url;
+      else setPreviewLink(result.url);
+    } else {
+      tab?.close();
+      setStatus(result?.error ?? "No se pudo abrir la vista previa");
+    }
+  };
+
+  const previewButton = (id?: string) => (
+    <button
+      type="button"
+      disabled={busy !== null}
+      onClick={(event) => void handlePreview(event.currentTarget.form, id)}
+      className="rounded-md border border-gray-600 px-4 py-2 text-gray-200 hover:border-gray-400 hover:text-white disabled:opacity-60"
+    >
+      {busy === (id ? `preview:${id}` : "preview") ? "Preparando..." : "Vista previa"}
+    </button>
+  );
+
   const handleDelete = async (id: string) => {
     if (!confirm("¿Eliminar este contenido?")) return;
     setBusy(`delete:${id}`);
@@ -168,15 +206,33 @@ export function CollectionManager({
       >
         <h3 className="font-semibold text-white">Nuevo</h3>
         <FieldGrid fields={fields} categorySuggestions={categorySuggestions} />
-        <button
-          type="submit"
-          disabled={busy !== null}
-          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
-        >
-          {busy === "create" ? "Creando..." : "Crear"}
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="submit"
+            disabled={busy !== null}
+            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
+          >
+            {busy === "create" ? "Creando..." : "Crear"}
+          </button>
+          {previewButton()}
+        </div>
       </form>
-      {status ? <p className="text-teal-300">{status}</p> : null}
+      {status ? (
+        <p role="status" className="text-teal-300">
+          {status}
+        </p>
+      ) : null}
+      {previewLink ? (
+        <a
+          href={previewLink}
+          target="_blank"
+          rel="noopener"
+          onClick={() => setPreviewLink("")}
+          className="text-teal-300 underline hover:text-teal-200"
+        >
+          Vista previa lista: abrir el sitio
+        </a>
+      ) : null}
       <ul className="space-y-3">
         {rows.map((row) => (
           <li key={row._id} className="rounded-lg border border-gray-800 p-4">
@@ -208,13 +264,16 @@ export function CollectionManager({
             {editingId === row._id && editing ? (
               <form onSubmit={handleUpdate} onChange={() => setStatus("")} className="mt-4 space-y-3">
                 <FieldGrid fields={fields} values={editing} categorySuggestions={categorySuggestions} />
-                <button
-                  type="submit"
-                  disabled={busy !== null}
-                  className="rounded-md bg-teal-600 px-4 py-2 text-white disabled:opacity-60"
-                >
-                  {busy === "update" ? "Guardando..." : "Guardar cambios"}
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    disabled={busy !== null}
+                    className="rounded-md bg-teal-600 px-4 py-2 text-white disabled:opacity-60"
+                  >
+                    {busy === "update" ? "Guardando..." : "Guardar cambios"}
+                  </button>
+                  {previewButton(row._id)}
+                </div>
               </form>
             ) : null}
           </li>
@@ -317,6 +376,17 @@ function FieldGrid({
             </label>
           );
         }
+        if (field.type === "logo") {
+          return (
+            <ImageDropField
+              key={field.name}
+              name={field.name}
+              label={field.label}
+              defaultValue={typeof value === "string" ? value : ""}
+              logo
+            />
+          );
+        }
         if (field.name === "imageUrl" || field.name === "logoUrl") {
           return (
             <ImageDropField
@@ -407,24 +477,36 @@ function ImageDropField({
   name,
   label,
   defaultValue,
+  logo,
 }: {
   name: string;
   label: string;
   defaultValue: string;
+  /** Procesa el archivo como logo y muestra cómo queda en la tarjeta del sitio. */
+  logo?: boolean;
 }) {
   const [url, setUrl] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
     setUploading(true);
+    setUploadError("");
     const form = new FormData();
     form.append("file", file);
-    const response = await fetch("/api/admin/upload", { method: "POST", body: form });
-    const data = (await response.json()) as { url?: string; error?: string };
-    if (data.url) setUrl(data.url);
+    if (logo) form.append("kind", "logo");
+    const response = await fetch("/api/admin/upload", { method: "POST", body: form }).catch(() => null);
+    const data = (await response?.json().catch(() => ({}))) as
+      | { url?: string; error?: string }
+      | undefined;
+    if (data?.url) {
+      setUrl(data.url);
+    } else {
+      setUploadError(data?.error ?? "No se pudo subir la imagen. Probá de nuevo.");
+    }
     setUploading(false);
   };
 
@@ -458,15 +540,36 @@ function ImageDropField({
             : "border-gray-600 bg-gray-900/80 text-gray-400 hover:border-gray-400 hover:text-gray-200"
         }`}
       >
-        {url ? (
+        {url && !logo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt="" className="mb-2 max-h-28 rounded object-contain" />
         ) : null}
         <span className="text-sm font-medium">
-          {uploading ? "Subiendo..." : "Arrastrá una imagen o hacé clic para elegir"}
+          {uploading
+            ? logo
+              ? "Subiendo y ajustando el logo..."
+              : "Subiendo..."
+            : "Arrastrá una imagen o hacé clic para elegir"}
         </span>
-        <span className="text-xs text-gray-500">PNG, JPG o WebP</span>
+        <span className="text-xs text-gray-500">
+          {logo
+            ? "PNG, JPG, WebP o SVG. Recortamos los márgenes y quitamos el fondo liso automáticamente."
+            : "PNG, JPG o WebP"}
+        </span>
       </button>
+      {logo && url ? (
+        <div className="rounded-lg bg-gray-800 p-4">
+          <p className="mb-3 text-xs text-gray-400">Así se ve en la sección Nuestra Red:</p>
+          <div className="flex h-20 items-center justify-center">
+            <PartnerLogo logoUrl={url} name="" interactive={false} />
+          </div>
+        </div>
+      ) : null}
+      {uploadError ? (
+        <p role="alert" className="text-sm text-red-400">
+          {uploadError}
+        </p>
+      ) : null}
       <input
         ref={inputRef}
         type="file"
@@ -478,7 +581,13 @@ function ImageDropField({
         }}
       />
       {url ? (
-        <button type="button" className="text-xs text-red-400 hover:text-red-300" onClick={() => setUrl("")}>
+        <button
+          type="button"
+          className="text-xs text-red-400 hover:text-red-300"
+          onClick={() => {
+            setUrl("");
+          }}
+        >
           Quitar imagen
         </button>
       ) : null}

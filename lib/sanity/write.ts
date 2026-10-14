@@ -1,4 +1,5 @@
 import type { SanityDocument } from "@sanity/client";
+import { processLogo } from "@/lib/images/logo";
 import { getWriteClient } from "./client";
 import { isSanityConfigured, LANDING_SETTINGS_ID } from "./env";
 import {
@@ -82,9 +83,17 @@ export async function deleteDocument(id: string) {
   return client.delete(id);
 }
 
-export async function uploadImage(file: File) {
+export async function uploadImage(file: File, options: { logo?: boolean } = {}) {
   const client = getWriteClient();
   const buffer = Buffer.from(await file.arrayBuffer());
+  if (options.logo) {
+    const logo = await processLogo(buffer, file.type, file.name);
+    const asset = await client.assets.upload("image", logo.buffer, {
+      filename: logo.filename,
+      contentType: logo.contentType,
+    });
+    return { _id: asset._id, url: asset.url };
+  }
   const asset = await client.assets.upload("image", buffer, {
     filename: file.name,
     contentType: file.type,
