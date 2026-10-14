@@ -1,11 +1,9 @@
 import sharp from "sharp";
-import type { LogoSurface } from "@/lib/sanity/types";
 
 export type ProcessedLogo = {
   buffer: Buffer;
   contentType: string;
   filename: string;
-  surface: LogoSurface;
 };
 
 const MAX_SIZE = 800;
@@ -13,29 +11,8 @@ const MAX_SIZE = 800;
 const BG_TOLERANCE = 24;
 /** Hasta esta distancia el píxel es borde suavizado: queda semitransparente. */
 const EDGE_TOLERANCE = 90;
-/** Color de la tarjeta translúcida sobre la banda oscura de la sección. */
-// Si el color del logo no contrasta con esto, se muestra siempre en blanco.
-const GLASS_RGB: [number, number, number] = [29, 36, 51];
-const MIN_CONTRAST = 3;
 
 type Rgb = [number, number, number];
-
-function channelToLinear(value: number) {
-  const c = value / 255;
-  return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-}
-
-function luminance([r, g, b]: Rgb) {
-  return 0.2126 * channelToLinear(r) + 0.7152 * channelToLinear(g) + 0.0722 * channelToLinear(b);
-}
-
-const GLASS_LUMINANCE = luminance(GLASS_RGB);
-
-function contrastWithGlass(rgb: Rgb) {
-  const l = luminance(rgb);
-  const [hi, lo] = l > GLASS_LUMINANCE ? [l, GLASS_LUMINANCE] : [GLASS_LUMINANCE, l];
-  return (hi + 0.05) / (lo + 0.05);
-}
 
 function distance(data: Buffer, offset: number, bg: Rgb) {
   return Math.max(
@@ -80,48 +57,19 @@ function isAlreadyTransparent(data: Buffer, width: number, height: number) {
 }
 
 /**
- * Vuelve transparente el fondo conectado con los bordes. Los blancos internos del
- * logo (letras, contraformas) no se tocan.
+ * Vuelve transparente todo el color de fondo, también el encerrado (contraformas
+ * de letras), porque el sitio muestra el logo como silueta blanca. Los bordes
+ * suavizados quedan semitransparentes y sin el tinte del fondo.
  */
-function removeBackground(data: Buffer, width: number, height: number, bg: Rgb) {
-  const visited = new Uint8Array(width * height);
-  const queue: number[] = [];
-  for (const offset of borderOffsets(width, height)) {
-    const index = offset / 4;
-    if (!visited[index] && distance(data, offset, bg) <= BG_TOLERANCE) {
-      visited[index] = 1;
-      queue.push(index);
+function removeBackground(data: Buffer, bg: Rgb) {
+  for (let offset = 0; offset < data.length; offset += 4) {
+    const d = distance(data, offset, bg);
+    if (d <= BG_TOLERANCE) {
+      data[offset + 3] = 0;
+      continue;
     }
-  }
-
-  const edges = new Set<number>();
-  while (queue.length > 0) {
-    const index = queue.pop()!;
-    data[index * 4 + 3] = 0;
-    const x = index % width;
-    const y = (index - x) / width;
-    const neighbors = [
-      x > 0 ? index - 1 : -1,
-      x < width - 1 ? index + 1 : -1,
-      y > 0 ? index - width : -1,
-      y < height - 1 ? index + width : -1,
-    ];
-    for (const next of neighbors) {
-      if (next < 0 || visited[next]) continue;
-      const d = distance(data, next * 4, bg);
-      if (d <= BG_TOLERANCE) {
-        visited[next] = 1;
-        queue.push(next);
-      } else if (d < EDGE_TOLERANCE) {
-        edges.add(next);
-      }
-    }
-  }
-
-  for (const index of edges) {
-    if (visited[index]) continue;
-    const offset = index * 4;
-    const alpha = (distance(data, offset, bg) - BG_TOLERANCE) / (EDGE_TOLERANCE - BG_TOLERANCE);
+    if (d >= EDGE_TOLERANCE) continue;
+    const alpha = (d - BG_TOLERANCE) / (EDGE_TOLERANCE - BG_TOLERANCE);
     for (let c = 0; c < 3; c++) {
       const unmixed = (data[offset + c] - bg[c] * (1 - alpha)) / alpha;
       data[offset + c] = Math.max(0, Math.min(255, Math.round(unmixed)));
@@ -150,62 +98,39 @@ function opaqueBounds(data: Buffer, width: number, height: number) {
 }
 
 /**
- * "glass" si el color original del logo se lee sobre la tarjeta oscura y no le
- * quedan áreas internas del color del fondo original; si no, "light".
- */
-function chooseSurface(data: Buffer, bg: Rgb | null): LogoSurface {
-  let opaque = 0;
-  let lowContrast = 0;
-  let leftoverBackground = 0;
-  for (let offset = 0; offset < data.length; offset += 4) {
-    if (data[offset + 3] < 128) continue;
-    opaque++;
-    const rgb: Rgb = [data[offset], data[offset + 1], data[offset + 2]];
-    if (contrastWithGlass(rgb) < MIN_CONTRAST) lowContrast++;
-    if (bg && distance(data, offset, bg) <= BG_TOLERANCE) leftoverBackground++;
-  }
-  if (opaque === 0) return "light";
-  if (lowContrast / opaque > 0.4) return "light";
-  if (leftoverBackground / opaque > 0.02) return "light";
-  return "glass";
-}
-
-/**
- * Normaliza un logo subido desde el panel: recorta márgenes, quita el fondo
- * uniforme y elige la tarjeta con la que se muestra. Los SVG se suben tal cual.
+ * Normaliza un logo subido desde el panel: quita el fondo liso y recorta los
+ * márgenes. Si el fondo no es liso (una foto) se guarda como JPG sin tocar. Los
+ * SVG se suben tal cual.
  */
 export async function processLogo(input: Buffer, contentType: string, name: string): Promise<ProcessedLogo> {
+  if (contentType === "image/svg+xml") {
+    return { buffer: input, contentType, filename: name };
+  }
   const baseName = name.replace(/\.[^.]+$/, "") || "logo";
-  const isSvg = contentType === "image/svg+xml";
 
   const { data, info } = await sharp(input, { failOn: "none" })
     .rotate()
-    .resize(MAX_SIZE, MAX_SIZE, { fit: "inside", withoutEnlargement: !isSvg })
+    .resize(MAX_SIZE, MAX_SIZE, { fit: "inside", withoutEnlargement: true })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
   const { width, height } = info;
 
-  if (isSvg) {
-    return { buffer: input, contentType, filename: name, surface: chooseSurface(data, null) };
-  }
-
-  let bg: Rgb | null = null;
   if (!isAlreadyTransparent(data, width, height)) {
-    bg = uniformBackground(data, width, height);
+    const bg = uniformBackground(data, width, height);
     if (!bg) {
       const buffer = await sharp(data, { raw: { width, height, channels: 4 } })
         .flatten({ background: "#ffffff" })
         .jpeg({ quality: 90 })
         .toBuffer();
-      return { buffer, contentType: "image/jpeg", filename: `${baseName}.jpg`, surface: "light" };
+      return { buffer, contentType: "image/jpeg", filename: `${baseName}.jpg` };
     }
-    removeBackground(data, width, height, bg);
+    removeBackground(data, bg);
   }
 
   const bounds = opaqueBounds(data, width, height);
   let image = sharp(data, { raw: { width, height, channels: 4 } });
   if (bounds) image = image.extract(bounds);
   const buffer = await image.png({ compressionLevel: 9 }).toBuffer();
-  return { buffer, contentType: "image/png", filename: `${baseName}.png`, surface: chooseSurface(data, bg) };
+  return { buffer, contentType: "image/png", filename: `${baseName}.png` };
 }

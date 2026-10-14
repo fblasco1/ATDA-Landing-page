@@ -1,6 +1,6 @@
 // Uso: node --experimental-strip-types scripts/reprocess-logos.mts [--dry-run]
-// Pasa por el procesamiento automático los logos de la Red cargados antes de que existiera
-// (los que no tienen logoSurface): recorta márgenes, quita el fondo liso y elige la tarjeta.
+// Pasa los logos de la Red por el procesamiento automático (quita el fondo liso y recorta
+// márgenes). Sirve para logos cargados antes de que existiera; repetirlo no cambia el resultado.
 import { createClient } from "@sanity/client";
 import { config } from "dotenv";
 import { processLogo } from "../lib/images/logo.ts";
@@ -25,12 +25,12 @@ const client = createClient({
 type Partner = { _id: string; name: string; logoUrl?: string };
 
 const partners = await client.fetch<Partner[]>(
-  `*[_type == "networkPartner" && !(_id in path("drafts.**")) && !defined(logoSurface)]{
+  `*[_type == "networkPartner" && !(_id in path("drafts.**"))]{
     _id, name, "logoUrl": coalesce(logo.asset->url, logoUrl)
   }`,
 );
 
-if (partners.length === 0) console.log("No hay logos para reprocesar.");
+if (partners.length === 0) console.log("No hay aliados cargados.");
 
 for (const partner of partners) {
   if (!partner.logoUrl) {
@@ -43,7 +43,7 @@ for (const partner of partners) {
   const logo = await processLogo(input, contentType, partner.logoUrl.split("/").pop() ?? "logo");
 
   if (dryRun) {
-    console.log(`${partner.name}: ${logo.contentType}, tarjeta ${logo.surface} (sin cambios, --dry-run)`);
+    console.log(`${partner.name}: quedaría como ${logo.contentType} (--dry-run, sin cambios)`);
     continue;
   }
 
@@ -51,6 +51,6 @@ for (const partner of partners) {
     filename: logo.filename,
     contentType: logo.contentType,
   });
-  await client.patch(partner._id).set({ logoUrl: asset.url, logoSurface: logo.surface }).commit();
-  console.log(`${partner.name}: listo (${logo.contentType}, tarjeta ${logo.surface})`);
+  await client.patch(partner._id).set({ logoUrl: asset.url }).commit();
+  console.log(`${partner.name}: listo (${logo.contentType})`);
 }

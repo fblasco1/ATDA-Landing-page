@@ -1,36 +1,27 @@
 import { normalizeExternalUrl } from "@/lib/utils";
 import type { NetworkPartner } from "@/lib/sanity/types";
-import { LogoTile, resolveLogoSurface } from "./logo-tile";
+import { PartnerLogo } from "./logo-tile";
 import { sectionBandClass, type SectionBand } from "./section-band";
 
-function PartnerTile({ partner }: { partner: NetworkPartner }) {
+function PartnerItem({ partner }: { partner: NetworkPartner }) {
   const href = normalizeExternalUrl(partner.url);
-  const inner = (
-    <>
-      <LogoTile
-        logoUrl={partner.logoUrl}
-        surface={resolveLogoSurface(partner.logoUrl, partner.logoSurface)}
-        name={partner.name}
-        className="h-24 w-full max-w-44 sm:h-32 sm:w-52 sm:max-w-none"
-      />
-      <p className="mt-4 max-w-[13rem] text-center text-sm font-semibold leading-snug text-white sm:text-base">
-        {partner.name}
-      </p>
-    </>
-  );
-
-  const className =
-    "group flex flex-col items-center justify-start transition duration-300 hover:-translate-y-1";
+  const className = "group flex h-16 items-center justify-center rounded-lg px-2";
+  const logo = <PartnerLogo logoUrl={partner.logoUrl} name={partner.name} interactive={Boolean(href)} />;
 
   if (href) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className={className} title={partner.name}>
-        {inner}
+        {logo}
+        <span className="sr-only"> (se abre en una pestaña nueva)</span>
       </a>
     );
   }
 
-  return <div className={className}>{inner}</div>;
+  return (
+    <div className={className} title={partner.name}>
+      {logo}
+    </div>
+  );
 }
 
 export function Network({
@@ -53,11 +44,13 @@ export function Network({
           <h2 className="text-3xl font-extrabold text-white md:text-4xl">{title}</h2>
           {subtitle ? <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-400">{subtitle}</p> : null}
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-10">
+        <ul className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-12 gap-y-10 sm:gap-x-16">
           {partners.map((partner) => (
-            <PartnerTile key={partner._id} partner={partner} />
+            <li key={partner._id}>
+              <PartnerItem partner={partner} />
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

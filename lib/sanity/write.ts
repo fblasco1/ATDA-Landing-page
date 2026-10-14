@@ -92,7 +92,7 @@ export async function uploadImage(file: File, options: { logo?: boolean } = {}) 
       filename: logo.filename,
       contentType: logo.contentType,
     });
-    return { _id: asset._id, url: asset.url, surface: logo.surface };
+    return { _id: asset._id, url: asset.url };
   }
   const asset = await client.assets.upload("image", buffer, {
     filename: file.name,
