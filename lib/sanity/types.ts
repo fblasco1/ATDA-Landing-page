@@ -88,7 +88,6 @@ export type NetworkPartner = {
   name: string;
   url?: string;
   logoUrl?: string;
-  logoBackground?: "white" | "dark" | "none";
 };
 
 export type CoursePriceMode = "general" | "members" | "free";
