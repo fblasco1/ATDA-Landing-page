@@ -508,12 +508,22 @@ function ImageDropField({
       {logo && url ? (
         <div className="rounded-lg bg-gray-800 p-4">
           <p className="mb-3 text-xs text-gray-400">Así se ve en la sección Nuestra Red:</p>
-          <LogoTile
-            logoUrl={url}
-            surface={resolveLogoSurface(url, surface)}
-            name=""
-            className="h-32 w-52"
-          />
+          <div className="flex flex-wrap gap-4">
+            {(["rest", "hover"] as const).map((state) => (
+              <figure key={state} className="space-y-2">
+                <LogoTile
+                  logoUrl={url}
+                  surface={resolveLogoSurface(url, surface)}
+                  name=""
+                  state={state}
+                  className="h-32 w-52"
+                />
+                <figcaption className="text-center text-xs text-gray-400">
+                  {state === "rest" ? "En reposo" : "Al pasar el mouse"}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       ) : null}
       {uploadError ? (

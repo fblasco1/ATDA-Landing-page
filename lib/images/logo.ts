@@ -14,6 +14,7 @@ const BG_TOLERANCE = 24;
 /** Hasta esta distancia el píxel es borde suavizado: queda semitransparente. */
 const EDGE_TOLERANCE = 90;
 /** Color de la tarjeta translúcida sobre la banda oscura de la sección. */
+// Si el color del logo no contrasta con esto, se muestra siempre en blanco.
 const GLASS_RGB: [number, number, number] = [29, 36, 51];
 const MIN_CONTRAST = 3;
 
@@ -149,8 +150,8 @@ function opaqueBounds(data: Buffer, width: number, height: number) {
 }
 
 /**
- * Decide la tarjeta: translúcida si el logo se lee sobre fondo oscuro y no le
- * quedan áreas internas del color del fondo original; si no, tarjeta clara.
+ * "glass" si el color original del logo se lee sobre la tarjeta oscura y no le
+ * quedan áreas internas del color del fondo original; si no, "light".
  */
 function chooseSurface(data: Buffer, bg: Rgb | null): LogoSurface {
   let opaque = 0;

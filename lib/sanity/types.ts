@@ -88,7 +88,7 @@ export type NetworkPartner = {
   name: string;
   url?: string;
   logoUrl?: string;
-  /** Tarjeta elegida al procesar el logo; vacío en logos cargados antes. */
+  /** glass: el color del logo se lee sobre fondo oscuro; light: no. Vacío en logos cargados antes. */
   logoSurface?: LogoSurface;
 };
 

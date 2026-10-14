@@ -59,7 +59,7 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
   networkPartner: {
     name: "Nombre",
     url: "Sitio web",
-    logoSurface: "Tarjeta del logo",
+    logoSurface: "Color del logo",
     logoUrl: "Logo",
   },
   course: {
@@ -78,7 +78,7 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
 
 const VALUE_LABELS: Record<string, Record<string, string>> = {
   priceMode: Object.fromEntries(PRICE_MODE_OPTIONS.map((option) => [option.value, option.label])),
-  logoSurface: { glass: "Translúcida", light: "Clara" },
+  logoSurface: { glass: "A color al pasar el mouse", light: "Siempre en blanco" },
 };
 
 const IMAGE_FIELDS = new Set(["imageUrl", "logoUrl"]);

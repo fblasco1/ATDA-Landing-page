@@ -9,7 +9,8 @@ export default async function AdminNetworkPage() {
       <h1 className="mb-2 text-3xl font-bold text-white">Red</h1>
       <p className="mb-6 text-gray-400">
         La sección Nuestra Red solo se ve si hay aliados cargados. Subí el logo como lo tengas (JPG, PNG o SVG): el
-        sitio recorta los márgenes, quita el fondo liso y elige la tarjeta que mejor lo muestra.
+        sitio recorta los márgenes y quita el fondo liso. Todos los logos se muestran en blanco y toman su color al
+        pasar el mouse.
       </p>
       <CollectionManager
         type="networkPartner"
