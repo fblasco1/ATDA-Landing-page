@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { useState } from "react";
 import { isFreeCourse, priceModeOf } from "@/lib/courses/pricing";
+import { parseBuyer } from "@/lib/enrollments/buyer";
 import { formatARS } from "@/lib/utils";
 import type { Course } from "@/lib/sanity/types";
 import { buttonClass } from "@/components/ui/button";
 
-export function CheckoutForm({ course }: { course: Course }) {
+export function CheckoutForm({ course, paymentEnabled }: { course: Course; paymentEnabled: boolean }) {
   const free = isFreeCourse(course);
+  const payOnline = !free && paymentEnabled;
   const [status, setStatus] = useState<"idle" | "submitting" | "error" | "done">("idle");
+  const [pendingPayment, setPendingPayment] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -26,24 +29,38 @@ export function CheckoutForm({ course }: { course: Course }) {
       website: String(form.get("website") ?? ""),
       termsAccepted: form.get("termsAccepted") === "on",
     };
+    const parsed = parseBuyer(payload);
+    if (!parsed.ok) {
+      setStatus("error");
+      setError(parsed.error);
+      return;
+    }
+    if (!payload.termsAccepted) {
+      setStatus("error");
+      setError("Tenés que aceptar los términos y condiciones.");
+      return;
+    }
 
     try {
-      const response = await fetch(free ? "/api/enrollments/free" : "/api/checkout/modo", {
+      const response = await fetch(payOnline ? "/api/checkout/modo" : "/api/enrollments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, ...parsed.buyer }),
       });
-      const data = (await response.json()) as { error?: string; enrollmentId?: string };
+      const data = (await response.json()) as {
+        error?: string;
+        enrollmentId?: string;
+        pendingPayment?: boolean;
+      };
       if (!response.ok) {
-        throw new Error(data.error ?? (free ? "No se pudo registrar la inscripción" : "No se pudo iniciar el pago"));
+        throw new Error(data.error ?? (payOnline ? "No se pudo iniciar el pago" : "No se pudo registrar la inscripción"));
       }
-      if (free) {
-        setStatus("done");
+      if (payOnline && data.enrollmentId) {
+        window.location.href = `/checkout/modo/${data.enrollmentId}`;
         return;
       }
-      if (data.enrollmentId) {
-        window.location.href = `/checkout/modo/${data.enrollmentId}`;
-      }
+      setPendingPayment(Boolean(data.pendingPayment));
+      setStatus("done");
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Error inesperado");
@@ -55,7 +72,9 @@ export function CheckoutForm({ course }: { course: Course }) {
       <div className="rounded-xl bg-gray-800 p-6 shadow-xl" role="status">
         <p className="text-lg font-semibold text-white">¡Listo, ya estás inscripto/a!</p>
         <p className="mt-2 text-gray-400">
-          Registramos tu inscripción a {course.title}. El equipo de ATDA te va a escribir con los detalles.
+          {pendingPayment
+            ? `Recibimos tu inscripción a ${course.title}. El pago online se suma más adelante; el equipo de ATDA te va a escribir para confirmarla.`
+            : `Registramos tu inscripción a ${course.title}. El equipo de ATDA te va a escribir con los detalles.`}
         </p>
       </div>
     );
@@ -66,8 +85,15 @@ export function CheckoutForm({ course }: { course: Course }) {
       <PriceSummary course={course} />
       <Input name="name" label="Nombre y apellido" autoComplete="name" required />
       <Input name="email" type="email" label="Email" autoComplete="email" required />
-      <Input name="dni" label="DNI" autoComplete="off" required />
-      <Input name="phone" type="tel" label="Teléfono" autoComplete="tel" required />
+      <Input
+        name="dni"
+        label="DNI"
+        autoComplete="off"
+        inputMode="numeric"
+        maxLength={8}
+        required
+      />
+      <Input name="phone" type="tel" label="Teléfono" autoComplete="tel" inputMode="tel" required />
       <div hidden>
         <label>
           Sitio web
@@ -96,7 +122,7 @@ export function CheckoutForm({ course }: { course: Course }) {
           .
         </span>
       </label>
-      {free ? null : (
+      {payOnline ? (
         <div className="rounded-lg border border-gray-700 p-4 text-left">
           <p className="font-semibold text-white">Pago con MODO</p>
           <p className="mt-1 text-sm text-gray-400">
@@ -104,22 +130,22 @@ export function CheckoutForm({ course }: { course: Course }) {
             Plus (Payway).
           </p>
         </div>
-      )}
+      ) : null}
       {error ? <p className="text-red-400">{error}</p> : null}
       <button
         type="submit"
         disabled={status === "submitting"}
         className={buttonClass({ className: "w-full" })}
       >
-        {free
+        {payOnline
           ? status === "submitting"
-            ? "Registrando..."
-            : "Inscribirme"
-          : status === "submitting"
             ? "Generando QR MODO..."
-            : "Pagar con MODO"}
+            : "Pagar con MODO"
+          : status === "submitting"
+            ? "Registrando..."
+            : "Inscribirme"}
       </button>
-      {free ? null : (
+      {payOnline ? (
         <p className="text-sm text-gray-400">
           El acceso al aula virtual lo asigna un administrador de ATDA después de acreditar el pago. Tenés 10 días para
           arrepentirte desde el{" "}
@@ -127,6 +153,11 @@ export function CheckoutForm({ course }: { course: Course }) {
             botón de arrepentimiento
           </Link>
           .
+        </p>
+      ) : free ? null : (
+        <p className="text-sm text-gray-400">
+          El pago online se suma más adelante. Con este formulario dejás tu inscripción y ATDA te escribe para
+          confirmarla.
         </p>
       )}
     </form>
@@ -163,12 +194,16 @@ function Input({
   label,
   type = "text",
   autoComplete,
+  inputMode,
+  maxLength,
   required,
 }: {
   name: string;
   label: string;
   type?: string;
   autoComplete?: string;
+  inputMode?: "numeric" | "tel" | "email" | "text";
+  maxLength?: number;
   required?: boolean;
 }) {
   return (
@@ -178,6 +213,8 @@ function Input({
         name={name}
         type={type}
         autoComplete={autoComplete}
+        inputMode={inputMode}
+        maxLength={maxLength}
         required={required}
         className="w-full rounded-md border border-gray-500 bg-gray-900 p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       />

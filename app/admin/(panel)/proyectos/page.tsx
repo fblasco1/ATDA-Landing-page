@@ -17,9 +17,31 @@ export default async function AdminProjectsPage() {
         fields={[
           { name: "title", label: "Título" },
           { name: "category", label: "Categoría", type: "creatable-select" },
+          {
+            name: "eventWhen",
+            label: "Fecha y horario",
+            hint: "Opcional. Se muestra resaltada una sola vez. No la repitas en el copete ni en el cuerpo.",
+          },
+          {
+            name: "eventWhere",
+            label: "Lugar",
+            hint: "Opcional. Se muestra resaltado, aparte del texto.",
+          },
           { name: "imageUrl", label: "Portada" },
-          { name: "description", label: "Copete", type: "textarea", rows: 3 },
-          { name: "body", label: "Cuerpo de la nota", type: "textarea", rows: 12 },
+          {
+            name: "description",
+            label: "Copete",
+            type: "textarea",
+            rows: 3,
+            hint: "Resumen de la nota. Si la fecha y el lugar van en los campos de arriba, no los escribas acá.",
+          },
+          {
+            name: "body",
+            label: "Cuerpo de la nota",
+            type: "textarea",
+            rows: 12,
+            hint: "Un enlace suelto (https://...) o con el formato [texto](https://...) se puede abrir desde la nota.",
+          },
           { name: "published", label: "Publicado", type: "checkbox" },
         ]}
       />

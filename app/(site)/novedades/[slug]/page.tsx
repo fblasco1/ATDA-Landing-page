@@ -1,17 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CourseLogistics } from "@/components/landing/course-logistics";
 import { Footer } from "@/components/landing/footer";
+import { LinkedText } from "@/components/ui/linked-text";
+import { presentArticle } from "@/lib/content/event-facts";
 import { getSiteContent, getSiteProjectBySlug } from "@/lib/sanity/site-content";
 import { formatDateES } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
-
-function bodyParagraphs(body: string) {
-  return body
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-}
 
 function CalendarIcon({ className }: { className?: string }) {
   return (
@@ -28,27 +24,29 @@ export default async function ActivityArticlePage({ params }: Props) {
   const [{ document: article }, landing] = await Promise.all([getSiteProjectBySlug(slug), getSiteContent()]);
   if (!article) notFound();
 
-  const paragraphs = bodyParagraphs(article.body ?? "");
+  const articleCopy = presentArticle(article);
   const dateLabel = formatDateES(article.publishedAt);
 
   return (
     <div className="min-h-screen bg-gray-950">
-      <main id="contenido" tabIndex={-1} className="px-6 py-12 md:py-16">
-        <article className="container mx-auto max-w-3xl">
-          <Link
-            href="/novedades"
-            className="inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300"
-          >
-            <span aria-hidden>←</span> Volver a {landing.settings.newsTitle}
-          </Link>
+      <main id="contenido" tabIndex={-1} className="py-12 md:py-16">
+        <article className="container mx-auto px-6">
+          <div className="flex flex-col items-start gap-8">
+            <Link
+              href="/novedades"
+              className="inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300"
+            >
+              <span aria-hidden>←</span> Volver a {landing.settings.newsTitle}
+            </Link>
 
-          {article.category ? (
-            <span className="mt-8 inline-block rounded-full bg-teal-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-950">
-              {article.category}
-            </span>
-          ) : null}
+            {article.category ? (
+              <span className="inline-flex rounded-full bg-teal-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-950">
+                {article.category}
+              </span>
+            ) : null}
+          </div>
 
-          <h1 className="mt-4 text-4xl font-extrabold leading-tight text-white md:text-5xl">{article.title}</h1>
+          <h1 className="mt-8 text-4xl font-extrabold leading-tight text-white md:text-5xl">{article.title}</h1>
 
           {dateLabel ? (
             <p className="mt-4 flex items-center gap-2 text-sm text-gray-400">
@@ -57,21 +55,41 @@ export default async function ActivityArticlePage({ params }: Props) {
             </p>
           ) : null}
 
-          {article.description ? (
-            <p className="mt-6 text-xl leading-relaxed text-gray-300">{article.description}</p>
+          <CourseLogistics
+            when={articleCopy.when}
+            where={articleCopy.where}
+            className="mt-6 flex max-w-xl flex-col gap-2"
+          />
+
+          {articleCopy.description ? (
+            <p className="mt-6 text-xl leading-relaxed text-gray-300">
+              <LinkedText text={articleCopy.description} />
+            </p>
           ) : null}
 
-          {article.imageUrl ? (
-            <div className="mt-10 overflow-hidden rounded-2xl border border-gray-800">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={article.imageUrl} alt={article.title} className="w-full object-cover" />
+          <div
+            className={`mt-8 items-start gap-8 ${
+              article.imageUrl ? "lg:grid lg:grid-cols-[minmax(14rem,18rem)_minmax(0,1fr)] lg:gap-12" : ""
+            }`}
+          >
+            {article.imageUrl ? (
+              <figure className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 lg:sticky lg:top-24">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={article.imageUrl}
+                  alt={article.title}
+                  className="mx-auto max-h-56 w-full object-contain object-top sm:max-h-64 lg:max-h-[30rem]"
+                />
+              </figure>
+            ) : null}
+
+            <div className={`space-y-5 text-lg leading-relaxed text-gray-300 ${article.imageUrl ? "mt-8 lg:mt-0" : ""}`}>
+              {articleCopy.paragraphs.map((paragraph, index) => (
+                <p key={`${index}-${paragraph.slice(0, 24)}`} className="whitespace-pre-line">
+                  <LinkedText text={paragraph} />
+                </p>
+              ))}
             </div>
-          ) : null}
-
-          <div className="mt-10 space-y-5 text-lg leading-relaxed text-gray-300">
-            {paragraphs.map((paragraph, index) => (
-              <p key={`${index}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
-            ))}
           </div>
         </article>
       </main>

@@ -15,8 +15,10 @@ export default async function AdminEnrollmentsPage() {
     <div>
       <h1 className="mb-2 text-3xl font-bold text-white">Inscripciones</h1>
       <p className="mb-6 text-gray-400">
-        El aula virtual se crea a mano. Cuando el pago está acreditado, marcá el acceso como asignado y dejá el
-        usuario o enlace en las notas. Las inscripciones pagadas por fuera de la web se cargan con Nueva inscripción.
+        Cuando el pago está acreditado, cargá el enlace del aula. Se marca como asignada y se envía solo un mail al
+        inscripto con la bienvenida y ese enlace. Las inscripciones pagadas por fuera de la web se cargan con Nueva
+        inscripción. Las de cursos arancelados que llegan por el formulario quedan en pendiente hasta que marques el
+        pago.
       </p>
       <EnrollmentsTable items={items} courses={courses} />
     </div>

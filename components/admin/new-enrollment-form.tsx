@@ -85,8 +85,8 @@ export function NewEnrollmentForm({
         </label>
         <Input name="name" label="Nombre y apellido" required />
         <Input name="email" label="Email" type="email" required />
-        <Input name="dni" label="DNI" required />
-        <Input name="phone" label="Teléfono" type="tel" />
+        <Input name="dni" label="DNI" inputMode="numeric" required />
+        <Input name="phone" label="Teléfono" type="tel" inputMode="tel" required />
         <label className="text-sm text-gray-400">
           Importe (ARS)
           <input
@@ -143,11 +143,13 @@ function Input({
   name,
   label,
   type = "text",
+  inputMode,
   required,
 }: {
   name: string;
   label: string;
   type?: string;
+  inputMode?: "numeric" | "tel" | "email" | "text";
   required?: boolean;
 }) {
   return (
@@ -157,6 +159,7 @@ function Input({
       <input
         name={name}
         type={type}
+        inputMode={inputMode}
         required={required}
         autoComplete="off"
         className="mt-1 w-full rounded-md border border-gray-700 bg-gray-950 p-2 text-white"

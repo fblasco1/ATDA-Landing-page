@@ -27,7 +27,8 @@ export default async function AdminHomePage() {
       </div>
       <p className="mt-8 max-w-2xl text-gray-400">
         Las secciones de la landing (novedades, red y propuestas) solo se ven si hay datos cargados. El alta de
-        usuarios del aula virtual se hace a mano; acá solo marcás el acceso como concedido.
+        usuarios del aula virtual se hace a mano. Cuando el pago está acreditado, cargá el enlace del aula: queda
+        asignado y se le envía al inscripto un mail de bienvenida con ese enlace.
       </p>
     </div>
   );

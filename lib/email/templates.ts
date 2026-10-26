@@ -39,6 +39,33 @@ function button(href: string, label: string) {
 </p>`;
 }
 
+export function classroomWelcomeEmail(input: {
+  fullName: string;
+  courseTitle: string;
+  classroomUrl: string;
+}) {
+  const firstName = input.fullName.trim().split(/\s+/)[0] || input.fullName;
+  const subject = `Bienvenida a ${input.courseTitle}`;
+  const html = layout(`
+    <p style="margin:0 0 16px;">Hola ${escapeHtml(firstName)},</p>
+    <p style="margin:0 0 16px;">¡Bienvenido/a a <strong>${escapeHtml(input.courseTitle)}</strong>!</p>
+    <p style="margin:0 0 16px;">Ya tenés acceso al aula virtual. Entrá con este enlace:</p>
+    ${button(input.classroomUrl, "Entrar al aula")}
+    <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">Si el botón no funciona, copiá este enlace en el navegador:<br /><a href="${escapeHtml(input.classroomUrl)}" style="color:#2563eb;word-break:break-all;">${escapeHtml(input.classroomUrl)}</a></p>
+    <p style="margin:0;">Cualquier duda, respondé este mail y te ayudamos.</p>
+  `);
+  const text = [
+    `Hola ${firstName},`,
+    "",
+    `¡Bienvenido/a a ${input.courseTitle}!`,
+    "Ya tenés acceso al aula virtual. Entrá con este enlace:",
+    input.classroomUrl,
+    "",
+    "Cualquier duda, respondé este mail y te ayudamos.",
+  ].join("\n");
+  return { subject, html, text };
+}
+
 export function memberActivationEmail(input: { fullName: string; email: string; baseUrl: string }) {
   const firstName = input.fullName.trim().split(/\s+/)[0] || input.fullName;
   const activateUrl = `${input.baseUrl}/socio/activar?email=${encodeURIComponent(input.email)}`;
