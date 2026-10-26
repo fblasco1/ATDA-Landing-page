@@ -77,6 +77,10 @@ export type Project = {
   slug?: string;
   description: string;
   body?: string;
+  /** Fecha y horario del evento. Se muestra una sola vez, resaltado. */
+  eventWhen?: string;
+  /** Lugar del evento. Se muestra una sola vez, resaltado. */
+  eventWhere?: string;
   category?: string;
   imageUrl?: string;
   published: boolean;
@@ -96,7 +100,14 @@ export type Course = {
   _id: string;
   title: string;
   slug: string;
+  /** Hasta 200 caracteres. Se muestra en la tarjeta de la landing. */
+  shortDescription?: string;
+  /** Texto completo, en la página de inscripción. */
   description: string;
+  /** Fecha y horario. Se muestra resaltada en la tarjeta y en la propuesta. */
+  eventWhen?: string;
+  /** Lugar. Se muestra resaltado, aparte de la descripción. */
+  eventWhere?: string;
   category?: string;
   priceMode?: CoursePriceMode;
   /** Precio general (modalidad "general"). */
@@ -126,6 +137,8 @@ export type Enrollment = {
   providerPaymentId?: string;
   status: PaymentStatus;
   classroomAccess: ClassroomAccess;
+  /** Enlace del aula virtual. Al marcarlo como asignado se envía por mail al inscripto. */
+  classroomUrl?: string;
   notes?: string;
   modoQr?: string;
   modoDeeplink?: string;

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckoutForm } from "@/components/checkout/checkout-form";
+import { CourseLogistics } from "@/components/landing/course-logistics";
 import { CoursePrice } from "@/components/landing/course-price";
-import { isFreeCourse } from "@/lib/courses/pricing";
+import { LinkedText } from "@/components/ui/linked-text";
+import { coursePageCopy } from "@/lib/courses/copy";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
 import { getSiteContent, getSiteCourseBySlug } from "@/lib/sanity/site-content";
 
@@ -15,6 +17,7 @@ export default async function CoursePage({ params }: Props) {
     getSiteContent(),
   ]);
   if (!course) notFound();
+  const copy = coursePageCopy(course);
 
   return (
     <main id="contenido" tabIndex={-1} className="min-h-screen bg-gray-900 px-6 py-16">
@@ -28,7 +31,12 @@ export default async function CoursePage({ params }: Props) {
               {landing.settings.aboutTitle ? "Curso ATDA" : "Curso"}
             </p>
             <h1 className="mt-2 text-4xl font-extrabold text-white">{course.title}</h1>
-            <p className="mt-4 text-lg text-gray-300">{course.description}</p>
+            <CourseLogistics when={copy.when} where={copy.where} className="mt-5 flex flex-col gap-2" />
+            {copy.body ? (
+              <p className="mt-4 whitespace-pre-line text-lg text-gray-300">
+                <LinkedText text={copy.body} />
+              </p>
+            ) : null}
             <div className="mt-6">
               <CoursePrice course={course} size="lg" />
             </div>
@@ -40,21 +48,8 @@ export default async function CoursePage({ params }: Props) {
                 El formulario de inscripción aparece acá cuando guardes la propuesta.
               </p>
             </div>
-          ) : isFreeCourse(course) || isModoCheckoutEnabled() ? (
-            <CheckoutForm course={course} />
           ) : (
-            <div className="rounded-xl bg-gray-800 p-6 shadow-xl">
-              <p className="text-lg font-semibold text-white">Inscripciones online próximamente</p>
-              <p className="mt-2 text-gray-400">
-                Mientras habilitamos el pago online, escribinos y te contamos cómo inscribirte.
-              </p>
-              <Link
-                href="/#contact"
-                className="mt-6 inline-block w-full rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white hover:bg-blue-700"
-              >
-                Consultar por este curso
-              </Link>
-            </div>
+            <CheckoutForm course={course} paymentEnabled={isModoCheckoutEnabled()} />
           )}
         </div>
       </div>

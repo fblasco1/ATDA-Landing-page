@@ -1,5 +1,6 @@
 import { isActiveMember } from "@/lib/courses/member-check";
 import { coursePriceFor, isFreeCourse } from "@/lib/courses/pricing";
+import { parseBuyer } from "@/lib/enrollments/buyer";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
 import { createModoPaymentRequest } from "@/lib/payments/modo";
 import { getCourseById } from "@/lib/sanity/fetch";
@@ -18,12 +19,12 @@ export async function POST(request: Request) {
       phone?: string;
       termsAccepted?: boolean;
     };
-    if (!body.courseId || !body.name || !body.email || !body.dni || !body.phone) {
-      return Response.json({ error: "Completá todos los datos" }, { status: 400 });
-    }
+    const parsed = parseBuyer(body);
+    if (!parsed.ok) return Response.json({ error: parsed.error }, { status: 400 });
     if (body.termsAccepted !== true) {
       return Response.json({ error: "Tenés que aceptar los términos y condiciones" }, { status: 400 });
     }
+    if (!body.courseId) return Response.json({ error: "Completá todos los datos" }, { status: 400 });
 
     const course = await getCourseById(body.courseId);
     if (!course || !course.active) {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Esta actividad no es arancelada" }, { status: 400 });
     }
 
-    const isMember = await isActiveMember(body.email, body.dni);
+    const isMember = await isActiveMember(parsed.buyer.email, parsed.buyer.dni);
     const amount = coursePriceFor(course, isMember);
     if (amount <= 0) {
       return Response.json({ error: "El curso no tiene precio configurado" }, { status: 409 });
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
 
     const enrollment = await createEnrollment({
       course: { _type: "reference", _ref: course._id },
-      buyer: { name: body.name, email: body.email, dni: body.dni, phone: body.phone, isMember },
+      buyer: { ...parsed.buyer, isMember },
       amount,
       provider: "modo",
       status: "pending",
@@ -52,10 +53,10 @@ export async function POST(request: Request) {
       amount,
       description: `Curso ATDA: ${course.title}`,
       customer: {
-        full_name: body.name,
-        email: body.email,
-        identification: body.dni,
-        phone: body.phone,
+        full_name: parsed.buyer.name,
+        email: parsed.buyer.email,
+        identification: parsed.buyer.dni,
+        phone: parsed.buyer.phone,
       },
     });
 

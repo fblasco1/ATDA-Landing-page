@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { formatARS } from "@/lib/utils";
+import { safeClassroomUrl } from "@/lib/enrollments/classroom";
 import type { Course, Enrollment } from "@/lib/sanity/types";
 import { NewEnrollmentForm } from "./new-enrollment-form";
 
@@ -35,6 +36,11 @@ export function EnrollmentsTable({ items, courses: allCourses }: { items: Enroll
   const [statusFilter, setStatusFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
+  const [assigningId, setAssigningId] = useState<string | null>(null);
+  const [classroomUrl, setClassroomUrl] = useState("");
+  const [classroomNotes, setClassroomNotes] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const courses = useMemo(() => {
     const map = new Map<string, string>();
@@ -61,21 +67,64 @@ export function EnrollmentsTable({ items, courses: allCourses }: { items: Enroll
     });
   }, [rows, courseFilter, statusFilter, query]);
 
-  const grantAccess = async (id: string) => {
-    const notes = prompt("Notas del aula (usuario/enlace asignado a mano)") ?? "";
+  const notice = (text: string, error = false) => {
+    setMessage(text);
+    setMessageError(error);
+  };
+
+  const markPaid = async (id: string) => {
+    setBusyId(id);
     const response = await fetch(`/api/admin/enrollments/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ classroomAccess: "granted", notes }),
+      body: JSON.stringify({ status: "paid" }),
     });
+    const data = (await response.json().catch(() => ({}))) as { error?: string };
+    setBusyId(null);
     if (!response.ok) {
-      setMessage("No se pudo actualizar");
+      notice(data.error ?? "No se pudo actualizar el pago", true);
       return;
     }
+    setRows((current) => current.map((row) => (row._id === id ? { ...row, status: "paid" } : row)));
+    notice("Pago marcado como acreditado");
+  };
+
+  const grantAccess = async (id: string) => {
+    setBusyId(id);
+    const response = await fetch(`/api/admin/enrollments/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        classroomAccess: "granted",
+        classroomUrl,
+        notes: classroomNotes,
+      }),
+    });
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      emailSent?: boolean;
+      emailError?: string;
+    };
+    setBusyId(null);
+    if (!response.ok) {
+      notice(data.error ?? "No se pudo actualizar", true);
+      return;
+    }
+    const url = classroomUrl.trim();
+    const notes = classroomNotes.trim();
     setRows((current) =>
-      current.map((row) => (row._id === id ? { ...row, classroomAccess: "granted", notes } : row)),
+      current.map((row) =>
+        row._id === id ? { ...row, classroomAccess: "granted", classroomUrl: url, notes } : row,
+      ),
     );
-    setMessage("Aula marcada como asignada");
+    setAssigningId(null);
+    setClassroomUrl("");
+    setClassroomNotes("");
+    if (data.emailSent) {
+      notice("Aula asignada. Se envió el mail de bienvenida con el enlace.");
+    } else {
+      notice(`Aula asignada. No se pudo enviar el mail: ${data.emailError ?? "error desconocido"}`, true);
+    }
   };
 
   return (
@@ -85,6 +134,7 @@ export function EnrollmentsTable({ items, courses: allCourses }: { items: Enroll
         onCreated={(enrollment) => {
           setRows((current) => [enrollment, ...current]);
           setMessage("Inscripción creada");
+          setMessageError(false);
         }}
       />
       <div className="grid gap-3 md:grid-cols-3">
@@ -128,7 +178,7 @@ export function EnrollmentsTable({ items, courses: allCourses }: { items: Enroll
           />
         </label>
       </div>
-      {message ? <p className="text-teal-300">{message}</p> : null}
+      {message ? <p className={messageError ? "text-red-400" : "text-teal-300"}>{message}</p> : null}
       <p className="text-sm text-gray-500">
         {visible.length} de {rows.length} inscripción{rows.length === 1 ? "" : "es"}
       </p>
@@ -167,17 +217,87 @@ export function EnrollmentsTable({ items, courses: allCourses }: { items: Enroll
                   <td className="p-3">{row.status}</td>
                   <td className="p-3">
                     {row.classroomAccess === "granted" ? "Asignada" : "Pendiente"}
+                    {safeClassroomUrl(row.classroomUrl) ? (
+                      <a
+                        href={safeClassroomUrl(row.classroomUrl) ?? undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block text-xs text-teal-300 underline"
+                      >
+                        Abrir aula
+                      </a>
+                    ) : null}
                     {row.notes ? <div className="text-xs text-gray-500">{row.notes}</div> : null}
                   </td>
                   <td className="p-3">
-                    {row.status === "paid" && row.classroomAccess !== "granted" ? (
+                    {row.status === "pending" ? (
                       <button
                         type="button"
-                        onClick={() => grantAccess(row._id)}
-                        className="rounded-md bg-teal-700 px-3 py-1 text-white"
+                        disabled={busyId !== null}
+                        onClick={() => void markPaid(row._id)}
+                        className="mb-2 block rounded-md border border-gray-600 px-3 py-1 text-white disabled:opacity-60"
                       >
-                        Marcar aula asignada
+                        {busyId === row._id ? "Guardando..." : "Marcar pago acreditado"}
                       </button>
+                    ) : null}
+                    {row.status === "paid" && row.classroomAccess !== "granted" ? (
+                      assigningId === row._id ? (
+                        <form
+                          className="min-w-64 space-y-2"
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            void grantAccess(row._id);
+                          }}
+                        >
+                          <label className="block text-xs text-gray-400">
+                            Enlace del aula
+                            <input
+                              type="url"
+                              required
+                              value={classroomUrl}
+                              onChange={(event) => setClassroomUrl(event.target.value)}
+                              placeholder="https://enlace-del-aula"
+                              className="mt-1 w-full rounded-md border border-gray-700 bg-gray-950 p-2 text-sm text-white"
+                            />
+                          </label>
+                          <label className="block text-xs text-gray-400">
+                            Notas (opcional)
+                            <input
+                              value={classroomNotes}
+                              onChange={(event) => setClassroomNotes(event.target.value)}
+                              className="mt-1 w-full rounded-md border border-gray-700 bg-gray-950 p-2 text-sm text-white"
+                            />
+                          </label>
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              disabled={busyId !== null}
+                              className="rounded-md bg-teal-700 px-3 py-1 text-white disabled:opacity-60"
+                            >
+                              {busyId === row._id ? "Enviando..." : "Asignar y enviar mail"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setAssigningId(null)}
+                              className="rounded-md border border-gray-600 px-3 py-1 text-gray-300"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAssigningId(row._id);
+                            setClassroomUrl("");
+                            setClassroomNotes(row.notes ?? "");
+                          }}
+                          className="rounded-md bg-teal-700 px-3 py-1 text-white"
+                        >
+                          Asignar aula
+                        </button>
+                      )
                     ) : null}
                   </td>
                 </tr>

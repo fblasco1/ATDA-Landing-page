@@ -11,6 +11,9 @@ export type Field = {
   type?: "text" | "textarea" | "number" | "checkbox" | "select" | "creatable-select" | "icon" | "logo";
   options?: Array<{ value: string; label: string }>;
   rows?: number;
+  maxLength?: number;
+  required?: boolean;
+  hint?: string;
   /** Solo se muestra si el select `field` tiene alguno de estos valores. */
   showWhen?: { field: string; in: string[] };
 };
@@ -46,6 +49,7 @@ export function CollectionManager({
 }) {
   const [rows, setRows] = useState(() => normalizeItems(items));
   const [status, setStatus] = useState("");
+  const [statusError, setStatusError] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [busy, setBusy] = useState<string | null>(null);
@@ -101,6 +105,7 @@ export function CollectionManager({
     const data = (await response.json()) as { items?: Item[]; error?: string };
     if (!response.ok) {
       setStatus(data.error ?? "No se pudo recargar el listado");
+      setStatusError(true);
       return;
     }
     setRows(normalizeItems(data.items ?? []));
@@ -112,6 +117,7 @@ export function CollectionManager({
     const payload = readForm(new FormData(form));
     setBusy("create");
     setStatus("");
+    setStatusError(false);
     const response = await fetch("/api/admin/content", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -122,9 +128,11 @@ export function CollectionManager({
     if (response?.ok) {
       setFormKey((key) => key + 1);
       setStatus(createdMessage);
+      setStatusError(false);
       void refresh();
     } else {
       setStatus(result?.error ?? "No se pudo crear");
+      setStatusError(true);
     }
   };
 
@@ -135,6 +143,7 @@ export function CollectionManager({
     const payload = readForm(new FormData(event.currentTarget));
     setBusy("update");
     setStatus("");
+    setStatusError(false);
     const response = await fetch(`/api/admin/content/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -147,9 +156,11 @@ export function CollectionManager({
       setRows((current) => current.map((row) => (row._id === id ? { ...row, ...fieldValues } : row)));
       setEditingId(null);
       setStatus("Actualizado");
+      setStatusError(false);
       void refresh();
     } else {
       setStatus(result?.error ?? "No se pudo actualizar");
+      setStatusError(true);
     }
   };
 
@@ -159,6 +170,7 @@ export function CollectionManager({
     const tab = window.open("about:blank", "_blank");
     setBusy(id ? `preview:${id}` : "preview");
     setStatus("");
+    setStatusError(false);
     setPreviewLink("");
     const response = await fetch("/api/admin/preview", {
       method: "POST",
@@ -173,6 +185,7 @@ export function CollectionManager({
     } else {
       tab?.close();
       setStatus(result?.error ?? "No se pudo abrir la vista previa");
+      setStatusError(true);
     }
   };
 
@@ -187,13 +200,40 @@ export function CollectionManager({
     </button>
   );
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar este contenido?")) return;
+  const handleDelete = async (id: string, cascade = false) => {
+    if (!cascade && !confirm("¿Eliminar este contenido?")) return;
     setBusy(`delete:${id}`);
-    const response = await fetch(`/api/admin/content/${id}`, { method: "DELETE" }).catch(() => null);
+    setStatus("");
+    setStatusError(false);
+    const response = await fetch(
+      `/api/admin/content/${id}${cascade ? "?cascade=enrollments" : ""}`,
+      { method: "DELETE" },
+    ).catch(() => null);
+    const result = (await response?.json().catch(() => ({}))) as {
+      error?: string;
+      code?: string;
+      enrollments?: number;
+    };
     setBusy(null);
-    setStatus(response?.ok ? "Eliminado" : "No se pudo eliminar");
-    if (response?.ok) setRows((current) => current.filter((row) => row._id !== id));
+    if (response?.ok) {
+      setRows((current) => current.filter((row) => row._id !== id));
+      if (editingId === id) setEditingId(null);
+      setStatus(cascade ? "Eliminado, junto con sus inscripciones" : "Eliminado");
+      return;
+    }
+    if (result.code === "has-enrollments") {
+      const count = result.enrollments ?? 0;
+      const label = count === 1 ? "1 inscripción" : `${count} inscripciones`;
+      const accepted = confirm(
+        `Esta propuesta tiene ${label}, por eso no se puede borrar sola. ¿Borrar también esas inscripciones?`,
+      );
+      if (accepted) {
+        await handleDelete(id, true);
+        return;
+      }
+    }
+    setStatus(result.error ?? "No se pudo eliminar");
+    setStatusError(true);
   };
 
   return (
@@ -201,7 +241,10 @@ export function CollectionManager({
       <form
         key={formKey}
         onSubmit={handleCreate}
-        onChange={() => setStatus("")}
+        onChange={() => {
+          setStatus("");
+          setStatusError(false);
+        }}
         className="space-y-3 rounded-lg border border-gray-800 p-4"
       >
         <h3 className="font-semibold text-white">Nuevo</h3>
@@ -218,9 +261,9 @@ export function CollectionManager({
         </div>
       </form>
       {status ? (
-        <p role="status" className="text-teal-300">
-          {status}
-        </p>
+          <p role="status" className={statusError ? "text-red-400" : "text-teal-300"}>
+            {status}
+          </p>
       ) : null}
       {previewLink ? (
         <a
@@ -262,7 +305,14 @@ export function CollectionManager({
               </div>
             </div>
             {editingId === row._id && editing ? (
-              <form onSubmit={handleUpdate} onChange={() => setStatus("")} className="mt-4 space-y-3">
+              <form
+                onSubmit={handleUpdate}
+                onChange={() => {
+                  setStatus("");
+                  setStatusError(false);
+                }}
+                className="mt-4 space-y-3"
+              >
                 <FieldGrid fields={fields} values={editing} categorySuggestions={categorySuggestions} />
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -280,6 +330,31 @@ export function CollectionManager({
         ))}
       </ul>
     </div>
+  );
+}
+
+function TextAreaField({ field, value }: { field: Field; value: unknown }) {
+  const [text, setText] = useState(typeof value === "string" ? value : "");
+  const max = field.maxLength;
+  return (
+    <label className="md:col-span-2">
+      <span className="mb-1 block text-sm text-gray-400">{field.label}</span>
+      <textarea
+        name={field.name}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        rows={field.rows ?? 4}
+        maxLength={max}
+        required={field.required}
+        className="w-full rounded-md border border-gray-700 bg-gray-900 p-2 text-white"
+      />
+      {field.hint ? <span className="mt-1 block text-xs text-gray-500">{field.hint}</span> : null}
+      {max ? (
+        <span className={`mt-1 block text-xs ${text.length >= max ? "text-amber-300" : "text-gray-500"}`}>
+          {text.length}/{max}
+        </span>
+      ) : null}
+    </label>
   );
 }
 
@@ -311,17 +386,7 @@ function FieldGrid({
         }
         const value = values?.[field.name];
         if (field.type === "textarea") {
-          return (
-            <label key={field.name} className="md:col-span-2">
-              <span className="mb-1 block text-sm text-gray-400">{field.label}</span>
-              <textarea
-                name={field.name}
-                defaultValue={typeof value === "string" ? value : ""}
-                rows={field.rows ?? 4}
-                className="w-full rounded-md border border-gray-700 bg-gray-900 p-2 text-white"
-              />
-            </label>
-          );
+          return <TextAreaField key={field.name} field={field} value={value} />;
         }
         if (field.type === "checkbox") {
           const defaultChecked = values

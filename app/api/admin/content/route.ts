@@ -1,4 +1,5 @@
 import { requireAdminApi } from "@/lib/admin/session";
+import { normalizeCourseCopy } from "@/lib/courses/copy";
 import { createDocument, listDocuments } from "@/lib/sanity/write";
 import { expireLandingCache } from "@/lib/sanity/fetch";
 
@@ -26,6 +27,10 @@ export async function POST(request: Request) {
     const body = (await request.json()) as { type?: string; data?: Record<string, unknown> };
     if (!body.type || !allowed.has(body.type) || !body.data) {
       return Response.json({ error: "Datos inválidos" }, { status: 400 });
+    }
+    if (body.type === "course") {
+      const copyError = normalizeCourseCopy(body.data);
+      if (copyError) return Response.json({ error: copyError }, { status: 400 });
     }
     const item = await createDocument(body.type, body.data);
     expireLandingCache();

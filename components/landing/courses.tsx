@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { isFreeCourse } from "@/lib/courses/pricing";
+import { courseCardCopy } from "@/lib/courses/copy";
 import { isModoCheckoutEnabled } from "@/lib/payments/flags";
 import type { Course } from "@/lib/sanity/types";
+import { CourseLogistics } from "./course-logistics";
 import { CoursePrice } from "./course-price";
 import { sectionBandClass, sectionCardClass, type SectionBand } from "./section-band";
 import { buttonClass } from "@/components/ui/button";
@@ -45,6 +46,7 @@ export function Courses({
 
 function CourseCard({ course, band }: { course: Course; band: SectionBand }) {
   const finished = !course.active;
+  const copy = courseCardCopy(course);
 
   return (
     <article
@@ -72,7 +74,12 @@ function CourseCard({ course, band }: { course: Course; band: SectionBand }) {
         ) : null}
       </div>
       <h3 className="text-xl font-bold text-white">{course.title}</h3>
-      <p className="mt-2 flex-1 text-gray-400">{course.description}</p>
+      <div className="mt-3 flex flex-1 flex-col gap-3">
+        <CourseLogistics when={copy.when} where={copy.where} />
+        {copy.summary ? (
+          <p className="line-clamp-2 text-sm leading-relaxed text-gray-400">{copy.summary}</p>
+        ) : null}
+      </div>
       <div className="mt-4">
         <CoursePrice course={course} />
       </div>
@@ -81,7 +88,7 @@ function CourseCard({ course, band }: { course: Course; band: SectionBand }) {
           href={`/propuestas/${course.slug}`}
           className={buttonClass({ size: "sm", className: "mt-6 w-fit" })}
         >
-          {isFreeCourse(course) || isModoCheckoutEnabled() ? "Inscribirme" : "Ver curso"}
+          Inscribirme
         </Link>
       )}
     </article>

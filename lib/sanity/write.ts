@@ -78,9 +78,45 @@ export async function patchDocument(id: string, data: Record<string, unknown>) {
   return client.patch(id).set(data).commit();
 }
 
-export async function deleteDocument(id: string) {
+export class ReferencedByEnrollmentsError extends Error {
+  readonly code = "has-enrollments";
+
+  constructor(readonly count: number) {
+    super(
+      count === 1
+        ? "No se puede eliminar: tiene 1 inscripción asociada."
+        : `No se puede eliminar: tiene ${count} inscripciones asociadas.`,
+    );
+    this.name = "ReferencedByEnrollmentsError";
+  }
+}
+
+export async function deleteDocument(id: string, options?: { cascadeEnrollments?: boolean }) {
   const client = getWriteClient();
-  return client.delete(id);
+  const [refs, draft] = await Promise.all([
+    client.fetch<Array<{ _id: string; _type: string }>>(
+      `*[references($id)]{ _id, _type }`,
+      { id },
+      { perspective: "raw" },
+    ),
+    client.getDocument(`drafts.${id}`).catch(() => null),
+  ]);
+  const enrollments = refs.filter((ref) => ref._type === "enrollment");
+  const others = refs.filter((ref) => ref._type !== "enrollment");
+  if (others.length > 0) {
+    throw new Error("No se puede eliminar porque otros contenidos lo referencian.");
+  }
+  if (enrollments.length > 0 && !options?.cascadeEnrollments) {
+    throw new ReferencedByEnrollmentsError(enrollments.length);
+  }
+
+  const draftId = `drafts.${id}`;
+  const mutations: Array<{ delete: { id: string } }> = [
+    ...enrollments.map((ref) => ({ delete: { id: ref._id } })),
+    { delete: { id } },
+  ];
+  if (draft) mutations.push({ delete: { id: draftId } });
+  return client.mutate(mutations, { returnDocuments: false });
 }
 
 export async function uploadImage(file: File, options: { logo?: boolean } = {}) {
