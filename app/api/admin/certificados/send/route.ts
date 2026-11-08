@@ -1,5 +1,9 @@
 import { requireAdminApi } from "@/lib/admin/session";
-import { certificateFieldsFromBody, sendCertificateEmail } from "@/lib/email/certificate-mail";
+import {
+  certificateFieldsFromBody,
+  sendCertificateEmail,
+  type CertificateSendInput,
+} from "@/lib/email/certificate-mail";
 import { isEmailConfigured } from "@/lib/email/send";
 
 export const maxDuration = 60;
@@ -8,12 +12,14 @@ function fail(error: string, status = 400) {
   return Response.json({ success: false, error }, { status });
 }
 
-async function readInput(request: Request) {
+async function readInput(
+  request: Request,
+): Promise<{ input: CertificateSendInput } | { error: string }> {
   let body: Record<string, unknown>;
   try {
     body = (await request.json()) as Record<string, unknown>;
   } catch {
-    return { error: "El JSON del envío no se pudo leer." } as const;
+    return { error: "El JSON del envío no se pudo leer." };
   }
   return { input: certificateFieldsFromBody(body) };
 }
