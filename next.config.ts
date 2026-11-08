@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // El proxy bufferiza el body. Un PDF de certificado más el logo puede superar el límite de 10 MB.
+    proxyClientMaxBodySize: "20mb",
+  },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "cdn.sanity.io" }],
   },

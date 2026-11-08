@@ -13,12 +13,21 @@ function getClient() {
   return client;
 }
 
+export type EmailAttachment = {
+  filename: string;
+  content: Buffer;
+  contentType?: string;
+  /** Si está, el HTML puede mostrarla con src="cid:este-valor". */
+  contentId?: string;
+};
+
 /** Nunca lanza: el que llama decide qué hacer si el mail no sale. */
 export async function sendEmail(input: {
   to: string | string[];
   subject: string;
   html: string;
   text: string;
+  attachments?: EmailAttachment[];
   /** Resend descarta un envío repetido con la misma clave durante 24 h. */
   idempotencyKey?: string;
 }): Promise<EmailResult> {
@@ -34,6 +43,16 @@ export async function sendEmail(input: {
         subject: input.subject,
         html: input.html,
         text: input.text,
+        ...(input.attachments?.length
+          ? {
+              attachments: input.attachments.map((file) => ({
+                filename: file.filename,
+                content: file.content,
+                contentType: file.contentType,
+                contentId: file.contentId,
+              })),
+            }
+          : {}),
       },
       input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined,
     );
