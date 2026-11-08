@@ -6,6 +6,9 @@ import { config } from "dotenv";
 import { neon } from "@neondatabase/serverless";
 
 config({ path: ".env.local" });
+// `next dev` deja que .env.development.local pise .env.local. Sin esto el admin
+// queda en otra base y el login no lo encuentra.
+config({ path: ".env.development.local", override: true });
 
 const email = process.argv[2]?.trim().toLowerCase();
 const name = process.argv[3]?.trim() || null;

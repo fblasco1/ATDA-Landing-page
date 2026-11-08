@@ -11,6 +11,7 @@ const links = [
   { href: "/admin/red", label: "Red" },
   { href: "/admin/cursos", label: "Propuestas" },
   { href: "/admin/inscripciones", label: "Inscripciones" },
+  { href: "/admin/certificados", label: "Certificados" },
   { href: "/admin/socios", label: "Socios" },
   { href: "/admin/arrepentimientos", label: "Arrepentimientos" },
   { href: "/admin/historial", label: "Historial" },
